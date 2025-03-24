@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Image(models.Model):
@@ -8,6 +9,7 @@ class Image(models.Model):
 
     name = models.CharField(max_length=255)
     image = models.ImageField(upload_to="images/")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -37,6 +39,7 @@ class Video(models.Model):
 
     name = models.CharField(max_length=255)
     video = models.FileField(upload_to="videos/")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
