@@ -62,7 +62,7 @@ class CompressedVideo(models.Model):
         return f"{self.video.name} - {self.compression_ratio}"
 
 
-class CompressionSettings(models.Model):
+class CompressionSetting(models.Model):
     """
     Compression settings model.
     """

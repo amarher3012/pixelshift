@@ -8,5 +8,5 @@ from compression.models import (
     CompressedImage,
     Video,
     CompressedVideo,
-    CompressionSettings,
+    CompressionSetting,
 )

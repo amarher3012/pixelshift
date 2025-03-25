@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Image, CompressedImage, Video, CompressedVideo, CompressionSettings
+from .models import Image, CompressedImage, Video, CompressedVideo, CompressionSetting
 
 admin.site.register(
     [
@@ -8,6 +8,6 @@ admin.site.register(
         CompressedImage,
         Video,
         CompressedVideo,
-        CompressionSettings,
+        CompressionSetting,
     ]
 )
