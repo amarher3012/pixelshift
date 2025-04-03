@@ -73,6 +73,25 @@ TEMPLATES = [
     },
 ]
 
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": "permanent-images",
+            "location": "uploads",
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": "permanent-images",
+            "location": "static",
+        },
+    },
+}
+
+AWS_S3_ENDPOINT_URL = "http://localhost:4566"
+
 WSGI_APPLICATION = "config.wsgi.application"
 
 
