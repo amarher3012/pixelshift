@@ -17,9 +17,9 @@ class CompressedImageSerializer(serializers.ModelSerializer):
         model = CompressedImage
         fields = "__all__"
 
-    def validate(self, *validated_data):
-        user = validated_data.get("user")
-        image = validated_data.get("image")
+    def validate(self, data):
+        user = data.get("user")
+        image = data.get("image")
 
         db_image_exists = CompressedImage.objects.filter(user=user, image=image)
 
@@ -29,4 +29,4 @@ class CompressedImageSerializer(serializers.ModelSerializer):
         if db_image_exists:
             raise serializers.ValidationError("Image with this name already exists.")
 
-        return validated_data
+        return data

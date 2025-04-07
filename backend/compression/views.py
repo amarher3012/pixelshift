@@ -28,24 +28,6 @@ class ImageCompressionView(generics.ListCreateAPIView):
             quality = request.data.get("quality")
             user = request.user.pk
 
-            db_image = self.queryset().filter(user=user, image=image)
-
-            if db_image.exists():
-                return Response(
-                    {"error": "Image name already exists."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            if not image:
-                return Response(
-                    {"error": "No image provided."}, status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # TODO: Compress image
-            # 1. compress image and save image to memory
-            # 2. pass compressed image to serializer
-            # 3. let django-storages take care of saving it
-
             # Creates the compressed image instance to pass to the serializer
             compressed_image_instance = {
                 "name": name,

@@ -1,7 +1,9 @@
 import os
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from PIL import Image
+from io import BytesIO
 
 
 def get_upload_path(instance, filename):
@@ -23,10 +25,22 @@ class CompressedImage(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Image {self.name} - User: {self.user.username if self.user else 'Anonymous'}"
+        return (
+            f"Image {self.name} - User: "
+            f"{self.user.username if self.user else 'Anonymous'}"
+        )
 
     def save(self, *args, **kwargs):
         quality = kwargs.pop("quality", 75)
+        image = Image.open(self.image)
+
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
+        image_io = BytesIO()
+        image.save(image_io, "webp", quality=quality, optimize=True)
+
+        content_file = ContentFile(image_io.getvalue(), name=self.image.name)
+        self.image.file = content_file
+
         super().save(*args, **kwargs)
-        image = Image.open(self.image.path)
-        image.save(self.image.path, quality=quality, optimize=True)

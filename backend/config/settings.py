@@ -77,14 +77,14 @@ STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "bucket_name": "permanent-images",
+            "bucket_name": "images",
             "location": "uploads",
         },
     },
     "staticfiles": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "bucket_name": "permanent-images",
+            "bucket_name": "images",
             "location": "static",
         },
     },
