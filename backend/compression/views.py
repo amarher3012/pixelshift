@@ -1,7 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from PIL import Image
 
 from compression.models import *
 from compression.serializers import *
@@ -36,8 +35,6 @@ class ImageCompressionView(generics.ListCreateAPIView):
                 "quality": quality,
                 "user": user,
             }
-
-            # TODO: Set image route to user's id
 
             # Saves the compressed image to the database after validation
             serializer = self.get_serializer(data=compressed_image_instance)

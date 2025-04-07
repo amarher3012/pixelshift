@@ -7,7 +7,6 @@ from compression.models import (
 )
 
 
-# TODO: Validation
 class CompressedImageSerializer(serializers.ModelSerializer):
     """
     Serializer for the CompressedImage model.
