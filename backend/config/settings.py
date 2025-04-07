@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "compression",
 ]
 
 MIDDLEWARE = [
@@ -71,6 +72,25 @@ TEMPLATES = [
         },
     },
 ]
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": "images",
+            "location": "uploads",
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": "images",
+            "location": "static",
+        },
+    },
+}
+
+AWS_S3_ENDPOINT_URL = "http://localhost:4566"
 
 WSGI_APPLICATION = "config.wsgi.application"
 
