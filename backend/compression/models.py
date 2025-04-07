@@ -1,6 +1,7 @@
 import os
 from django.db import models
 from django.contrib.auth.models import User
+from PIL import Image
 
 
 def get_upload_path(instance, filename):
@@ -23,3 +24,9 @@ class CompressedImage(models.Model):
 
     def __str__(self):
         return f"Image {self.name} - User: {self.user.username if self.user else 'Anonymous'}"
+
+    def save(self, *args, **kwargs):
+        quality = kwargs.pop("quality", 75)
+        super().save(*args, **kwargs)
+        image = Image.open(self.image.path)
+        image.save(self.image.path, quality=quality, optimize=True)

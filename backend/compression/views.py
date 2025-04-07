@@ -1,4 +1,3 @@
-from abc import ABC
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -10,16 +9,7 @@ from compression.serializers import *
 
 class ImageCompressionView(generics.ListCreateAPIView):
     """
-    API view to upload a compressed image.
-    Args:
-        name (str): The name of the image.
-        image (Image): The image file to be uploaded.
-        user (User): The user who uploaded the image.
-        image_quality (float): The image quality setting.
-        date (datetime): The date when the image was uploaded.
-
-    Returns:
-        Response: A JSON response containing the image details to later use in the compression view.
+    API view to upload/list compressed images.
     """
 
     queryset = CompressedImage.objects.all()
@@ -28,12 +18,7 @@ class ImageCompressionView(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         """
-        Handle the POST request to upload a compressed image.
-        Args:
-            request (Request): The request object containing the image file and user.
-
-        Returns:
-            Response: A JSON response containing the image details.
+        POST endpoint to compress and upload an image.
         """
 
         try:
@@ -43,16 +28,25 @@ class ImageCompressionView(generics.ListCreateAPIView):
             quality = request.data.get("quality")
             user = request.user.pk
 
-            # TODO: compress image
+            db_image = self.queryset().filter(user=user, image=image)
+
+            if db_image.exists():
+                return Response(
+                    {"error": "Image name already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             if not image:
                 return Response(
                     {"error": "No image provided."}, status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # TODO: check if image name already exists
+            # TODO: Compress image
+            # 1. compress image and save image to memory
+            # 2. pass compressed image to serializer
+            # 3. let django-storages take care of saving it
 
-            # Create a new CompressedImage instance
+            # Creates the compressed image instance to pass to the serializer
             compressed_image_instance = {
                 "name": name,
                 "temp": temp,
@@ -61,12 +55,12 @@ class ImageCompressionView(generics.ListCreateAPIView):
                 "user": user,
             }
 
-            # TODO: set image route to user's id
+            # TODO: Set image route to user's id
 
-            # Save the compressed image to the database
+            # Saves the compressed image to the database after validation
             serializer = self.get_serializer(data=compressed_image_instance)
             if serializer.is_valid():
-                serializer.save()
+                serializer.save(quality=quality)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -78,13 +72,9 @@ class ImageCompressionView(generics.ListCreateAPIView):
 
     def list(self, request, *args, **kwargs):
         """
-        Handle the GET request to retrieve all compressed images.
-        Args:
-            request (Request): The request object.
-
-        Returns:
-            Response: A JSON response containing the list of compressed images.
+        GET endpoint to list all images beloging to the user.
         """
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
