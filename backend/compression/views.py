@@ -23,7 +23,8 @@ class ImageCompressionView(generics.ListCreateAPIView):
         try:
             name = request.data.get("name")
             temp = request.data.get("temp")
-            image = request.FILES.get("image")
+            temp_image = request.FILES.get("temp_image")
+            perm_image = request.FILES.get("perm_image")
             quality = request.data.get("quality")
             user = request.user.pk
 
@@ -31,7 +32,8 @@ class ImageCompressionView(generics.ListCreateAPIView):
             compressed_image_instance = {
                 "name": name,
                 "temp": temp,
-                "image": image,
+                "temp_image": temp_image,
+                "perm_image": perm_image,
                 "quality": quality,
                 "user": user,
             }
@@ -48,12 +50,3 @@ class ImageCompressionView(generics.ListCreateAPIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-    def list(self, request, *args, **kwargs):
-        """
-        GET endpoint to list all images beloging to the user.
-        """
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
