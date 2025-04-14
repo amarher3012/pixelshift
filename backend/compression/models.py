@@ -31,6 +31,7 @@ class CompressedImage(models.Model):
     )
     quality = models.IntegerField(default=75)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    # TODO: handle "guest_user"
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

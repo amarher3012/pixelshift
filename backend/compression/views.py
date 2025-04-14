@@ -1,6 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.utils import timezone
 
 from compression.models import *
 from compression.serializers import *
@@ -21,12 +22,32 @@ class ImageCompressionView(generics.ListCreateAPIView):
         """
 
         try:
+            # TODO: work with "guest_user" and set a cookie for the id of that "guest_user"
+            # Checks user limits
+            user = request.user
+            if not user.is_authenticated:
+                return Response(
+                    {"error": "Authentication required"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+
+            if not getattr(user, "is_premium", False):
+                one_hour_ago = timezone.now() - timezone.timedelta(hours=1)
+                hourly_uploads = CompressedImage.objects.filter(
+                    user=user.pk, created_at__gte=one_hour_ago
+                ).count()
+
+                if hourly_uploads >= 5:
+                    return Response(
+                        {"error": "Free users can only upload 5 images per hour"},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+
             name = request.data.get("name")
             temp = request.data.get("temp")
             temp_image = request.FILES.get("temp_image")
             perm_image = request.FILES.get("perm_image")
             quality = request.data.get("quality")
-            user = request.user.pk
 
             # Creates the compressed image instance to pass to the serializer
             compressed_image_instance = {
