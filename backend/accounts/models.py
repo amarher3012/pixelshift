@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, AnonymousUser
+from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
@@ -7,5 +7,5 @@ class User(AbstractUser):
 
 
 class GuestUser(models.Model):
-    guest_id = models.CharField(max_length=50, unique=True)
+    guest_id = models.CharField(max_length=36, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)

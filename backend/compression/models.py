@@ -1,10 +1,11 @@
 import os
 from django.db import models
-from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from storages.backends.s3 import S3Storage
 from PIL import Image
 from io import BytesIO
+
+from accounts.models import User, GuestUser
 
 
 class PermStorage(S3Storage):
@@ -13,9 +14,13 @@ class PermStorage(S3Storage):
 
 
 def get_upload_path(instance, filename):
-    user_id = instance.user.id if instance.user else "anonymous"
+    user = (
+        instance.user.id
+        if instance.user
+        else instance.guest_user.guest_id if instance.guest_user else "Null"
+    )
 
-    return os.path.join(f"user_{user_id}", filename)
+    return os.path.join(f"{user}", filename)
 
 
 class CompressedImage(models.Model):
@@ -31,7 +36,9 @@ class CompressedImage(models.Model):
     )
     quality = models.IntegerField(default=75)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    # TODO: handle "guest_user"
+    guest_user = models.ForeignKey(
+        GuestUser, on_delete=models.SET_NULL, null=True, blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
