@@ -1,16 +1,10 @@
 import os
 from django.db import models
 from django.core.files.base import ContentFile
-from storages.backends.s3 import S3Storage
 from PIL import Image
 from io import BytesIO
 
 from accounts.models import User, GuestUser
-
-
-class PermStorage(S3Storage):
-    bucket_name = "perm"
-    location = "uploads"
 
 
 def get_upload_path(instance, filename):
@@ -19,8 +13,8 @@ def get_upload_path(instance, filename):
         if instance.user
         else instance.guest_user.guest_id if instance.guest_user else "Null"
     )
-
-    return os.path.join(f"{user}", filename)
+    prefix = prefix = "temp" if instance.temp else "perm"
+    return os.path.join(prefix, f"{user}", filename)
 
 
 class CompressedImage(models.Model):
@@ -30,10 +24,7 @@ class CompressedImage(models.Model):
 
     name = models.CharField(max_length=255)
     temp = models.BooleanField(default=False, null=True)
-    temp_image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
-    perm_image = models.ImageField(
-        upload_to=get_upload_path, storage=PermStorage, blank=True, null=True
-    )
+    image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
     quality = models.IntegerField(default=75)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     guest_user = models.ForeignKey(
@@ -48,7 +39,7 @@ class CompressedImage(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        image_field = self.temp_image if self.temp else self.perm_image
+        image_field = self.image
         if image_field:
             image = Image.open(image_field).convert("RGB")
             image_io = BytesIO()
