@@ -1,15 +1,20 @@
 import os
 from django.db import models
-from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from PIL import Image
 from io import BytesIO
 
+from accounts.models import User, GuestUser
+
 
 def get_upload_path(instance, filename):
-    user_id = instance.user.id if instance.user else "anonymous"
-
-    return os.path.join("uploads", f"user_{user_id}", filename)
+    user = (
+        instance.user.id
+        if instance.user
+        else instance.guest_user.guest_id if instance.guest_user else "Null"
+    )
+    prefix = "temp" if instance.temp or instance.guest_user else "perm"
+    return os.path.join(prefix, f"{user}", filename)
 
 
 class CompressedImage(models.Model):
@@ -18,10 +23,13 @@ class CompressedImage(models.Model):
     """
 
     name = models.CharField(max_length=255)
-    temp = models.BooleanField(default=True, blank=True, null=True)
-    image = models.ImageField(upload_to=get_upload_path)
+    temp = models.BooleanField(default=False, null=True)
+    image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
     quality = models.IntegerField(default=75)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    guest_user = models.ForeignKey(
+        GuestUser, on_delete=models.SET_NULL, null=True, blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -31,16 +39,13 @@ class CompressedImage(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        quality = kwargs.pop("quality", 75)
-        image = Image.open(self.image)
-
-        if image.mode != "RGB":
-            image = image.convert("RGB")
-
-        image_io = BytesIO()
-        image.save(image_io, "webp", quality=quality, optimize=True)
-
-        content_file = ContentFile(image_io.getvalue(), name=self.image.name)
-        self.image.file = content_file
-
+        image_field = self.image
+        if image_field:
+            image = Image.open(image_field).convert("RGB")
+            image_io = BytesIO()
+            image.save(
+                image_io, "webp", quality=kwargs.pop("quality", 75), optimize=True
+            )
+            image_field.file = ContentFile(image_io.getvalue(), name=image_field.name)
+            
         super().save(*args, **kwargs)
