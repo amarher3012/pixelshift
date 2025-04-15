@@ -33,6 +33,7 @@ class ImageCompressionView(generics.ListCreateAPIView):
                     response.set_cookie("guest_id", guest_id)
             else:
                 guest_user = None
+                response.delete_cookie("guest_id")
 
             # Apply upload limits
             one_hour_ago = timezone.now() - timezone.timedelta(hours=1)
@@ -40,7 +41,7 @@ class ImageCompressionView(generics.ListCreateAPIView):
                 hourly_uploads = CompressedImage.objects.filter(
                     user=user, created_at__gte=one_hour_ago
                 ).count()
-                if hourly_uploads >= 5:
+                if hourly_uploads >= 25:
                     return Response(
                         {"error": "Free users can only upload 5 images per hour"},
                         status=status.HTTP_403_FORBIDDEN,
@@ -58,18 +59,17 @@ class ImageCompressionView(generics.ListCreateAPIView):
             # Gather data
             name = request.data.get("name")
             temp = request.data.get("temp")
-            temp_image = request.FILES.get("temp_image")
-            perm_image = request.FILES.get("perm_image")
+            image = request.FILES.get("image")
             quality = request.data.get("quality")
 
             # Create compressed image instance
             compressed_image_instance = {
                 "name": name,
                 "temp": temp,
-                "temp_image": temp_image,
-                "perm_image": perm_image,
+                "image": image,
                 "quality": quality,
             }
+
             if user.is_authenticated:
                 compressed_image_instance["user"] = user.pk
             else:

@@ -15,31 +15,11 @@ class CompressedImageSerializer(serializers.ModelSerializer):
         model = CompressedImage
         fields = "__all__"
 
+    # TODO: add more validation
     def validate(self, data):
-        user = data.get("user")
-        temp_image = data.get("temp_image")
-        perm_image = data.get("perm_image")
+        image = data.get("image")
 
-        if not temp_image and not perm_image:
-            raise serializers.ValidationError(
-                "Either temporary or permanent image must be provided."
-            )
-
-        if temp_image and perm_image:
-            raise serializers.ValidationError(
-                "Cannot provide both temporary and permanent image."
-            )
-
-        if temp_image:
-            db_image_exists = CompressedImage.objects.filter(
-                user=user, temp_image=temp_image
-            )
-        elif perm_image:
-            db_image_exists = CompressedImage.objects.filter(
-                user=user, perm_image=perm_image
-            )
-
-        if db_image_exists:
-            raise serializers.ValidationError("Image with this name already exists.")
+        if not image:
+            raise serializers.ValidationError("An image must be provided.")
 
         return data

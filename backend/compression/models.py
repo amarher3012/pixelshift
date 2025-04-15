@@ -13,7 +13,7 @@ def get_upload_path(instance, filename):
         if instance.user
         else instance.guest_user.guest_id if instance.guest_user else "Null"
     )
-    prefix = prefix = "temp" if instance.temp else "perm"
+    prefix = "temp" if instance.temp or instance.guest_user else "perm"
     return os.path.join(prefix, f"{user}", filename)
 
 

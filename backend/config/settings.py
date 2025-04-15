@@ -83,20 +83,21 @@ STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "bucket_name": "temp",
+            "bucket_name": "pixelshift",
             "location": "uploads",
         },
     },
     "staticfiles": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "bucket_name": "perm",
+            "bucket_name": "pixelshift",
             "location": "static",
         },
     },
 }
 
 AWS_S3_ENDPOINT_URL = "http://localhost:4566"
+AWS_S3_FILE_OVERWRITE = False
 
 WSGI_APPLICATION = "config.wsgi.application"
 
