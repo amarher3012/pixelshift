@@ -47,4 +47,5 @@ class CompressedImage(models.Model):
                 image_io, "webp", quality=kwargs.pop("quality", 75), optimize=True
             )
             image_field.file = ContentFile(image_io.getvalue(), name=image_field.name)
+            
         super().save(*args, **kwargs)

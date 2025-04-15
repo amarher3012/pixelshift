@@ -99,6 +99,7 @@ STORAGES = {
 AWS_S3_ENDPOINT_URL = "http://localhost:4566"
 AWS_S3_FILE_OVERWRITE = False
 
+
 WSGI_APPLICATION = "config.wsgi.application"
 
 
