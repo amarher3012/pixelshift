@@ -2,6 +2,7 @@ import uuid
 from rest_framework import status, generics
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
 
 from .models import GuestUser, CompressedImage
@@ -12,6 +13,7 @@ class ImageCompressionView(generics.ListCreateAPIView):
     queryset = CompressedImage.objects.all()
     serializer_class = CompressedImageSerializer
     parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         try:
