@@ -1,7 +1,9 @@
 from rest_framework import status, generics
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenBlacklistView
+from rest_framework_simplejwt.exceptions import InvalidToken
 
 
 from .models import User
@@ -19,10 +21,75 @@ class RegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         refresh = RefreshToken.for_user(user)
-        return Response(
+
+        response = Response(
             {
                 "user": {"username": user.username},
-                "refresh": str(refresh),
                 "access": str(refresh.access_token),
-            }
+            },
+            status=status.HTTP_201_CREATED,
         )
+
+        response.headers["Set-Cookie"] = (
+            f"refreshToken={refresh}; HttpOnly; SameSite=None; Secure; Path=/; Partitioned;"
+        )
+
+        return response
+
+
+class LoginView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get("refreshToken")
+        if refresh_token:
+            try:
+                RefreshToken(refresh_token).verify()
+                return Response(
+                    {"detail": "User is already logged in."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            except InvalidToken:
+                pass  # Invalid or expired token, proceed with login
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.user
+        refresh = RefreshToken.for_user(user)
+
+        response = Response(
+            {
+                "user": {"username": user.username},
+                "access": str(refresh.access_token),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+        response.headers["Set-Cookie"] = (
+            f"refreshToken={refresh}; HttpOnly; SameSite=None; Secure; Path=/; Partitioned;"
+        )
+
+        return response
+
+
+class LogoutView(TokenBlacklistView):
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('refreshToken')
+        if not refresh_token:
+            return Response(
+                {"detail": "No refresh token provided."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+        except InvalidToken:
+            return Response(
+                {"detail": "Invalid refresh token."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        response = Response({"detail": "Successfully logged out."}, status=status.HTTP_205_RESET_CONTENT)
+        response.headers["Set-Cookie"] = (
+            "refreshToken=; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=0; Partitioned;"
+        )
+        return response

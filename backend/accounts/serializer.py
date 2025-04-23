@@ -5,6 +5,7 @@ from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
 
+    # TODO: add more fields
     class Meta:
         model = User
         fields = ["username", "password"]
@@ -16,3 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+    # def validate(self, validated_data):
+    #     # TODO: check for existing user and raise specific error
+    #     pass
