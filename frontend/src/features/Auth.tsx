@@ -6,17 +6,24 @@ import { useNavigate } from 'react-router'
 type Inputs = {
     username: string
     password: string
+    password2: string
+}
+
+const errorTypes = {
+    isAuthenticated: 'User is already logged in.',
 }
 
 // Forms
 export function Register() {
     // BUG: fix error handling (user register - 400 (user is logged in.))
+    // TODO: redirect to actual site instead of previous
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm<Inputs>()
 
+    const navigate = useNavigate()
     const onSubmit: SubmitHandler<Inputs> = (data) => {
         axios.defaults.baseURL = 'https://localhost/api/accounts/'
         axios.defaults.withCredentials = true
@@ -31,21 +38,26 @@ export function Register() {
                 return axios.post('login/', {
                     username: data.username,
                     password: data.password,
+                    password2: data.password2,
                 })
             })
             .then((res) => {
                 const accessToken = res.data.access
                 localStorage.setItem('accessToken', accessToken)
-                axios.defaults.headers.common[
-                    'Authorization'
-                ] = `Bearer ${accessToken}`
-                console.log('Auto-login successful')
+                navigate('/login')
             })
-            .catch((err) => console.log(err.response?.data))
+            .catch((err) => {
+                if (err.response?.data?.detail === errorTypes.isAuthenticated) {
+                    // TODO: show the user they are already logged in then send them to home
+                    // Maybe using axios interceptor
+                    navigate('/upload')
+                }
+            })
     }
 
     return (
         <div>
+            <h1>Register form</h1>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
                 <input
                     placeholder="Username"
@@ -59,7 +71,14 @@ export function Register() {
                     type="password"
                     {...register('password', { required: true })}
                 />
-                {errors.password && <span>This field is required</span>}
+                <input
+                    placeholder="Repeat your password"
+                    type="password"
+                    {...register('password2', { required: true })}
+                />
+                {errors.password && errors.password2 && (
+                    <span>This field is required</span>
+                )}
                 <input type="submit" className="border" />
             </form>
         </div>
@@ -89,7 +108,7 @@ export function Login() {
                 axios.defaults.headers.common[
                     'Authorization'
                 ] = `Bearer ${accessToken}`
-                navigate(-1)
+                navigate('/upload')
             })
             .catch((err) => {
                 if (err.response.status === 400) {
@@ -101,6 +120,7 @@ export function Login() {
 
     return (
         <div>
+            <h1>Login form</h1>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
                 <input
                     placeholder="Username"
@@ -147,8 +167,12 @@ export function Logout() {
     }
 
     return (
+        // Only testing this.
         <div>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col gap-5"
+            >
                 <input type="submit" className="border" />
             </form>
         </div>
