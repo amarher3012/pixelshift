@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,7 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
-    'rest_framework_simplejwt.token_blacklist',
+    "rest_framework_simplejwt.token_blacklist",
     "accounts",
     "compression",
 ]
@@ -102,8 +103,10 @@ STORAGES = {
         },
     },
 }
-
+# Update the S3 endpoint URL to use HTTPS
 AWS_S3_ENDPOINT_URL = "http://localhost:4566"
+# Add these settings to handle self-signed certificates
+AWS_S3_VERIFY = False  # Only for development!
 AWS_S3_FILE_OVERWRITE = False
 
 
@@ -163,18 +166,21 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
-    "https://localhost",
-    "https://localhost:5173",
+    "https://axmh.tech",
+    "https://api.axmh.tech",
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "https://localhost",
+    "https://axmh.tech",
+    "https://api.axmh.tech",
 ]
 
 # SimpleJWT
 SIMPLE_JWT = {
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=30),  # Testing
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=5),  # Testing
 }

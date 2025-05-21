@@ -27,5 +27,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/accounts/", include("accounts.urls"), name="accounts"),
     path("api/compression/", include("compression.urls"), name="compression"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"), # TODO: adjust token lifetime
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]

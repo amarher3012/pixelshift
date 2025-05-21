@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router'
-import { createContext, useContext, useState } from 'react'
+import { AuthProvider } from './context/AuthContext'
 
 import './index.css'
 import Home from './pages/Home'
@@ -8,12 +8,8 @@ import Upload from './features/Upload'
 import Layout from './components/Layout'
 
 export default function App() {
-    const AuthContext = createContext('isAuthenticated')
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-    // TODO: create global isAuthenticated variable with a fetch to the backend
-
     return (
-        <AuthContext.Provider value="false">
+        <AuthProvider>
             <BrowserRouter>
                 <Routes>
                     <Route element={<Layout />}>
@@ -25,6 +21,6 @@ export default function App() {
                     </Route>
                 </Routes>
             </BrowserRouter>
-        </AuthContext.Provider>
+        </AuthProvider>
     )
 }

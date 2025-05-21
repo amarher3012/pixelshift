@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenBlacklistView
-from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 from .models import User
 from .serializer import UserSerializer
@@ -54,7 +54,6 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LoginView(TokenObtainPairView):
-    # TODO: handle token refresh and missing token
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get("refreshToken")
         if refresh_token:
@@ -64,7 +63,8 @@ class LoginView(TokenObtainPairView):
                     {"detail": "User is already logged in."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            except InvalidToken:
+            except TokenError:
+                # Token is invalid or expired, proceed with login
                 pass
 
         serializer = self.get_serializer(data=request.data)

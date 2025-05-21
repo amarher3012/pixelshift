@@ -1,7 +1,8 @@
-import axios from 'axios'
+import axios from './axiosConfig'
 import { useForm } from 'react-hook-form'
 import './Auth.css'
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 
 type Inputs = {
     name: string
@@ -11,36 +12,49 @@ type Inputs = {
 }
 
 export default function Upload() {
+    const { isAuthenticated } = useAuth()
+
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm<Inputs>()
 
-    axios.defaults.baseURL = 'https://localhost/api/compression/'
-    axios.defaults.withCredentials = true
+    const [error, setError] = useState<string>('')
+    const [isRefreshing, setIsRefreshing] = useState(false)
 
     const onSubmit = (data: Inputs) => {
         const accessToken = localStorage.getItem('accessToken')
         const formData = new FormData()
         formData.append('name', data.name)
-        formData.append('temp', data.temp.toString())
+        formData.append('temp', (!data.temp).toString()) // Invert the value
         formData.append('image', data.image[0])
         formData.append('quality', data.quality.toString())
 
+        setError('')
+        setIsRefreshing(false)
+
         axios
-            .post('upload/', formData, {
+            .post('compression/upload/', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     ...(accessToken && {
                         Authorization: `Bearer ${accessToken}`,
                     }),
                 },
-                withCredentials: true,
             })
-            .then((response) => console.log(response.data))
+            .then((response) => {
+                console.log(response.data)
+                setError('')
+            })
             .catch((err) => {
-                // TODO: handle expired access token
+                if (err.response?.status === 401) {
+                    setIsRefreshing(true)
+                    setError('Refreshing authentication...')
+                } else {
+                    setError(err.response?.data?.detail || 'Upload failed')
+                }
+                console.error('Upload error:', err.response?.data)
             })
     }
 
@@ -78,6 +92,16 @@ export default function Upload() {
 
             {isUploadOpen && (
                 <div className="bg-black/25 backdrop-blur-xs p-10 rounded-xl">
+                    {error && (
+                        <div className="text-red-500 mb-4 text-center">
+                            {error}
+                        </div>
+                    )}
+                    {isRefreshing && (
+                        <div className="text-amber-500 mb-4 text-center">
+                            Refreshing token...
+                        </div>
+                    )}
                     <form
                         onSubmit={handleSubmit(onSubmit)}
                         className="flex flex-col gap-5"
@@ -127,8 +151,8 @@ export default function Upload() {
                             )}
                         </div>
 
-                        {/* TODO: add isAuthenticated check here */}
-                        {false && (
+                        {/* Show save permanently only if authenticated */}
+                        {isAuthenticated && (
                             <div className="flex items-center gap-3">
                                 <span className="text-sm">
                                     Save permanently?

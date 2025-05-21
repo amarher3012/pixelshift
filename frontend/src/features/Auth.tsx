@@ -1,6 +1,9 @@
-import axios from 'axios'
+import axios from './axiosConfig'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router'
+import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { ApiError } from '../types/errors'
 
 // Type
 type Inputs = {
@@ -11,6 +14,7 @@ type Inputs = {
 
 const errorTypes = {
     isAuthenticated: 'User is already logged in.',
+    tokenExpired: 'Token has expired',
 }
 
 // Forms
@@ -25,11 +29,8 @@ export function Register() {
 
     const navigate = useNavigate()
     const onSubmit: SubmitHandler<Inputs> = (data) => {
-        axios.defaults.baseURL = 'https://localhost/api/accounts/'
-        axios.defaults.withCredentials = true
-
         axios
-            .post('register/', {
+            .post('accounts/register/', {
                 username: data.username,
                 password: data.password,
             })
@@ -86,6 +87,9 @@ export function Register() {
 }
 
 export function Login() {
+    const { setIsAuthenticated } = useAuth()
+    const [loginError, setLoginError] = useState<string>('')
+    const [isLoading, setIsLoading] = useState(false)
     const {
         register,
         handleSubmit,
@@ -93,12 +97,28 @@ export function Login() {
     } = useForm<Inputs>()
 
     const navigate = useNavigate()
-    const onSubmit: SubmitHandler<Inputs> = (data) => {
-        axios.defaults.baseURL = 'https://localhost/api/accounts/'
-        axios.defaults.withCredentials = true
+    const onSubmit: SubmitHandler<Inputs> = async (data) => {
+        setIsLoading(true)
+        setLoginError('')
 
+        try {
+            await axios.post('accounts/logout/')
+        } catch (err) {
+            const error = err as ApiError
+            if (error.response?.data?.detail !== errorTypes.tokenExpired) {
+                console.error(error)
+            }
+        } finally {
+            setIsLoading(false)
+        }
+
+        // Clear any leftover tokens
+        localStorage.clear()
+        delete axios.defaults.headers.common['Authorization']
+
+        // Now try to login
         axios
-            .post('login/', {
+            .post('accounts/login/', {
                 username: data.username,
                 password: data.password,
             })
@@ -108,55 +128,91 @@ export function Login() {
                 axios.defaults.headers.common[
                     'Authorization'
                 ] = `Bearer ${accessToken}`
+                setIsAuthenticated(true)
                 navigate('/upload')
             })
             .catch((err) => {
-                if (err.response.status === 400) {
-                    const errData = err.response.data
-                    console.log(errData)
+                if (err.response?.status === 400) {
+                    setLoginError(err.response.data.detail || 'Login failed')
                 }
             })
     }
 
-    return (
-        <div>
-            <h1>Login form</h1>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
-                <input
-                    placeholder="Username"
-                    {...register('username', { required: true })}
-                    className="border"
-                />
-                {errors.username && <span>This field is required</span>}
+    const handleGuestUpload = () => {
+        localStorage.clear()
+        delete axios.defaults.headers.common['Authorization']
+        navigate('/upload')
+    }
 
-                <input
-                    placeholder="Password"
-                    type="password"
-                    {...register('password', { required: true })}
-                />
-                {errors.password && <span>This field is required</span>}
-                <input type="submit" className="border" />
-            </form>
+    return (
+        <div className="flex flex-col gap-5 items-center">
+            <h1 className="text-2xl">Welcome to PixelShift</h1>
+
+            <div className="flex gap-4 items-center">
+                <div className="flex flex-col">
+                    <h2 className="text-xl mb-4">Login</h2>
+                    {loginError && (
+                        <div className="text-red-500 mb-4">{loginError}</div>
+                    )}
+                    <form
+                        onSubmit={handleSubmit(onSubmit)}
+                        className="flex flex-col gap-3"
+                    >
+                        <input
+                            placeholder="Username"
+                            {...register('username', { required: true })}
+                            className="border"
+                        />
+                        {errors.username && <span>This field is required</span>}
+
+                        <input
+                            placeholder="Password"
+                            type="password"
+                            {...register('password', { required: true })}
+                        />
+                        {errors.password && <span>This field is required</span>}
+                        <input
+                            type="submit"
+                            value={isLoading ? 'Logging in...' : 'Login'}
+                            disabled={isLoading}
+                            className="border bg-[#aa6ced] text-white p-2 rounded-lg disabled:opacity-50"
+                        />
+                    </form>
+                </div>
+
+                <div className="flex items-center">
+                    <span className="px-4 text-neutral-500">or</span>
+                </div>
+
+                <div className="flex flex-col items-center">
+                    <h2 className="text-xl mb-4">Continue as Guest</h2>
+                    <button
+                        onClick={handleGuestUpload}
+                        className="border bg-neutral-700 text-white p-2 rounded-lg hover:bg-neutral-600"
+                    >
+                        Upload without account
+                    </button>
+                    <p className="text-sm text-neutral-500 mt-2">
+                        Note: Files will be temporary
+                    </p>
+                </div>
+            </div>
         </div>
     )
 }
 
 export function Logout() {
+    const { setIsAuthenticated } = useAuth()
     const { handleSubmit } = useForm()
     const navigate = useNavigate()
 
     const onSubmit = () => {
-        axios.defaults.baseURL = 'https://localhost/api/accounts/'
-        axios.defaults.withCredentials = true
-
         axios
-            .post(
-                'https://localhost/api/accounts/logout/',
-                {},
-                { withCredentials: true }
-            )
+            .post('accounts/logout/', {})
             .then(() => {
                 delete axios.defaults.headers.common['Authorization']
+                localStorage.removeItem('accessToken')
+                setIsAuthenticated(false)
                 navigate('/login/')
             })
             .catch((err) => {
