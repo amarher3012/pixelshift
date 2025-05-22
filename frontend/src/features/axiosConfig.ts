@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-axios.defaults.baseURL = 'https://api.axmh.tech/'
+axios.defaults.baseURL = 'https://api.axmh.tech/api/'
 axios.defaults.withCredentials = true
 
 const token = localStorage.getItem('accessToken')
