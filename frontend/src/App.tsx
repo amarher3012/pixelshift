@@ -4,8 +4,9 @@ import { AuthProvider } from './context/AuthContext'
 import './index.css'
 import Home from './pages/Home'
 import { Register, Login } from './features/Auth'
-import Upload from './features/Upload'
+import ImageDetail from './pages/ImageDetail'
 import Layout from './components/Layout'
+import ImageHub from './pages/ImageHub'
 
 export default function App() {
     return (
@@ -16,7 +17,8 @@ export default function App() {
                         <Route index element={<Home />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/login" element={<Login />} />
-                        <Route path="/upload" element={<Upload />} />
+                        <Route path="/images" element={<ImageHub />} />
+                        <Route path="/images/:id" element={<ImageDetail />} />
                         {/* /upload will later become Home*/}
                     </Route>
                 </Routes>

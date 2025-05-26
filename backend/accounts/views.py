@@ -2,7 +2,11 @@ from rest_framework import status, generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenBlacklistView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenBlacklistView,
+    TokenRefreshView,
+)
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 from .models import User
@@ -111,3 +115,22 @@ class LogoutView(TokenBlacklistView):
             "refreshToken=; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=0; Partitioned;"
         )
         return response
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get("refreshToken")
+        if not refresh_token:
+            return Response(
+                {"detail": "No refresh token provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            access_token = str(refresh.access_token)
+
+            return Response({"access": access_token})
+
+        except TokenError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)

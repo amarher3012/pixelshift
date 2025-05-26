@@ -1,4 +1,4 @@
-import axios from './axiosConfig'
+import axios, { cleanupAuth } from './axiosConfig'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { useState } from 'react'
@@ -8,6 +8,7 @@ import { ApiError } from '../types/errors'
 // Type
 type Inputs = {
     username: string
+    email: string
     password: string
     password2: string
 }
@@ -19,12 +20,12 @@ const errorTypes = {
 
 // Forms
 export function Register() {
-    // BUG: fix error handling (user register - 400 (user is logged in.))
-    // TODO: redirect to actual site instead of previous
+    const [success, setSuccess] = useState<boolean>(false)
     const {
         register,
         handleSubmit,
         formState: { errors },
+        watch,
     } = useForm<Inputs>()
 
     const navigate = useNavigate()
@@ -32,25 +33,18 @@ export function Register() {
         axios
             .post('accounts/register/', {
                 username: data.username,
+                email: data.email,
                 password: data.password,
+                password2: data.password2,
             })
             .then((_response) => {
-                console.log('Registered successfully')
-                return axios.post('login/', {
-                    username: data.username,
-                    password: data.password,
-                    password2: data.password2,
-                })
-            })
-            .then((res) => {
-                const accessToken = res.data.access
-                localStorage.setItem('accessToken', accessToken)
-                navigate('/login')
+                setSuccess(true)
+                setTimeout(() => {
+                    navigate('/login')
+                }, 2000)
             })
             .catch((err) => {
                 if (err.response?.data?.detail === errorTypes.isAuthenticated) {
-                    // TODO: show the user they are already logged in then send them to home
-                    // Maybe using axios interceptor
                     navigate('/upload')
                 }
             })
@@ -59,29 +53,69 @@ export function Register() {
     return (
         <div>
             <h1>Register form</h1>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
-                <input
-                    placeholder="Username"
-                    {...register('username', { required: true })}
-                    className="border"
-                />
-                {errors.username && <span>This field is required</span>}
+            {success ? (
+                <div className="text-green-500 mb-4">
+                    Registration successful! Redirecting to login...
+                </div>
+            ) : (
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="flex flex-col"
+                >
+                    <input
+                        placeholder="Username"
+                        {...register('username', {
+                            required: 'Username is required',
+                        })}
+                        className="border"
+                    />
+                    {errors.username && <span>{errors.username.message}</span>}
 
-                <input
-                    placeholder="Password"
-                    type="password"
-                    {...register('password', { required: true })}
-                />
-                <input
-                    placeholder="Repeat your password"
-                    type="password"
-                    {...register('password2', { required: true })}
-                />
-                {errors.password && errors.password2 && (
-                    <span>This field is required</span>
-                )}
-                <input type="submit" className="border" />
-            </form>
+                    <input
+                        placeholder="Email"
+                        type="email"
+                        {...register('email', {
+                            required: 'Email is required',
+                            pattern: {
+                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                message: 'Invalid email address',
+                            },
+                        })}
+                        className="border"
+                    />
+                    {errors.email && <span>{errors.email.message}</span>}
+
+                    <input
+                        placeholder="Password"
+                        type="password"
+                        {...register('password', {
+                            required: 'Password is required',
+                            minLength: {
+                                value: 8,
+                                message:
+                                    'Password must be at least 8 characters',
+                            },
+                        })}
+                    />
+                    {errors.password && <span>{errors.password.message}</span>}
+
+                    <input
+                        placeholder="Confirm Password"
+                        type="password"
+                        {...register('password2', {
+                            required: 'Please confirm your password',
+                            validate: (value) =>
+                                value === watch('password') ||
+                                'The passwords do not match',
+                        })}
+                    />
+                    {errors.password2 && (
+                        <span>{errors.password2.message}</span>
+                    )}
+
+                    <input type="submit" className="border" />
+                </form>
+            )}
         </div>
     )
 }
@@ -101,22 +135,9 @@ export function Login() {
         setIsLoading(true)
         setLoginError('')
 
-        try {
-            await axios.post('accounts/logout/')
-        } catch (err) {
-            const error = err as ApiError
-            if (error.response?.data?.detail !== errorTypes.tokenExpired) {
-                console.error(error)
-            }
-        } finally {
-            setIsLoading(false)
-        }
+        // Clean up any existing auth state before attempting login
+        await cleanupAuth()
 
-        // Clear any leftover tokens
-        localStorage.clear()
-        delete axios.defaults.headers.common['Authorization']
-
-        // Now try to login
         axios
             .post('accounts/login/', {
                 username: data.username,
@@ -125,23 +146,31 @@ export function Login() {
             .then((response) => {
                 const accessToken = response.data.access
                 localStorage.setItem('accessToken', accessToken)
+                localStorage.setItem('username', data.username)
                 axios.defaults.headers.common[
                     'Authorization'
                 ] = `Bearer ${accessToken}`
                 setIsAuthenticated(true)
-                navigate('/upload')
+                navigate('/')
             })
             .catch((err) => {
                 if (err.response?.status === 400) {
-                    setLoginError(err.response.data.detail || 'Login failed')
+                    setLoginError(
+                        err.response.data.detail ===
+                            'User is already logged in.'
+                            ? 'You are already logged in. Please log out first.'
+                            : err.response.data.detail || 'Invalid credentials'
+                    )
+                } else {
+                    setLoginError('An error occurred during login')
                 }
+                setIsLoading(false)
             })
     }
 
     const handleGuestUpload = () => {
-        localStorage.clear()
-        delete axios.defaults.headers.common['Authorization']
-        navigate('/upload')
+        cleanupAuth()
+        navigate('/')
     }
 
     return (

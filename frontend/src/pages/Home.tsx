@@ -1,7 +1,10 @@
 import Upload from '../features/Upload'
 import '../features/Auth.css'
+import { useRef } from 'react'
 
 export default function Home() {
+    const dropdownRef = useRef<HTMLDivElement>(null)
+
     return (
         <div className="flex flex-col justify-center-safe lg:w-2/4 sm:w-3/4  mx-auto my-auto p-4">
             <div className="flex flex-col justify-center gap-5 p-4 rounded-2xl">
@@ -15,7 +18,11 @@ export default function Home() {
                     sapiente maxime numquam eaque. Numquam, minima.
                 </p>
             </div>
-            <Upload />
+            <div className="relative" ref={dropdownRef}>
+                <div className="absolute left-0 right-0 mt-2 bg-black/50 backdrop-blur-sm rounded-lg shadow-lg p-4">
+                    <Upload />
+                </div>
+            </div>
         </div>
     )
 }

@@ -23,6 +23,7 @@ class CompressedImage(models.Model):
     """
 
     name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
     temp = models.BooleanField(default=False, null=True)
     image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
     quality = models.IntegerField(default=75)
@@ -31,6 +32,7 @@ class CompressedImage(models.Model):
         GuestUser, on_delete=models.SET_NULL, null=True, blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    is_public = models.BooleanField(default=True)
 
     def __str__(self):
         return (
@@ -47,5 +49,5 @@ class CompressedImage(models.Model):
                 image_io, "webp", quality=kwargs.pop("quality", 75), optimize=True
             )
             image_field.file = ContentFile(image_io.getvalue(), name=image_field.name)
-            
+
         super().save(*args, **kwargs)

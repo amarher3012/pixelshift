@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // axios.defaults.baseURL = 'https://api.axmh.tech/api/'
-axios.defaults.baseURL = 'http://127.0.0.1:8000/api'  // Testing
+axios.defaults.baseURL = 'http://127.0.0.1:8000/api' // Testing
 axios.defaults.withCredentials = true
 
 const token = localStorage.getItem('accessToken')
@@ -15,10 +15,25 @@ axios.interceptors.response.use(
         const originalRequest = error.config
 
         if (error.response?.status === 401 && !originalRequest._retry) {
+            // Don't retry if it's a login request or refresh request
+            if (
+                originalRequest.url === 'accounts/login/' ||
+                originalRequest.url === 'accounts/refresh/'
+            ) {
+                return Promise.reject(error)
+            }
+
             originalRequest._retry = true
 
             try {
-                const response = await axios.post('accounts/refresh/')
+                const response = await axios.post(
+                    'accounts/refresh/',
+                    {},
+                    {
+                        withCredentials: true,
+                    }
+                )
+
                 const newToken = response.data.access
                 localStorage.setItem('accessToken', newToken)
                 axios.defaults.headers.common[
@@ -45,5 +60,10 @@ axios.interceptors.response.use(
         return Promise.reject(error)
     }
 )
+
+export const cleanupAuth = () => {
+    localStorage.clear()
+    delete axios.defaults.headers.common['Authorization']
+}
 
 export default axios
