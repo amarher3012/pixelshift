@@ -1,22 +1,15 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { useState, ReactNode } from 'react'
+
 import axios from '../features/axiosConfig'
 import { cleanupAuth } from '../features/axiosConfig'
-
-interface AuthContextType {
-    isAuthenticated: boolean
-    setIsAuthenticated: (value: boolean) => void
-    logout: () => void
-}
-
-const AuthContext = createContext<AuthContextType>({
-    isAuthenticated: false,
-    setIsAuthenticated: () => {},
-    logout: () => {},
-})
+import { AuthContext } from './authUtils'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
         return !!localStorage.getItem('accessToken')
+    })
+    const [username, setUsername] = useState<string | null>(() => {
+        return localStorage.getItem('username')
     })
 
     const logout = async () => {
@@ -27,16 +20,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } finally {
             cleanupAuth()
             setIsAuthenticated(false)
+            setUsername(null)
         }
     }
 
     return (
         <AuthContext.Provider
-            value={{ isAuthenticated, setIsAuthenticated, logout }}
+            value={{
+                isAuthenticated,
+                username,
+                setIsAuthenticated,
+                setUsername,
+                logout,
+            }}
         >
             {children}
         </AuthContext.Provider>
     )
 }
-
-export const useAuth = () => useContext(AuthContext)
