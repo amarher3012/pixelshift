@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from rest_framework import status, generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -13,7 +14,6 @@ from .models import User
 from .serializer import UserSerializer
 
 
-# TODO: handle email confirmation (https://testdriven.io/blog/django-rest-auth/)
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -21,6 +21,8 @@ class RegisterView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get("refreshToken")
+
+        # If a refresh token is present, the user is logged in
         if refresh_token:
             try:
                 RefreshToken(refresh_token).verify()
@@ -30,12 +32,6 @@ class RegisterView(generics.CreateAPIView):
                 )
             except InvalidToken:
                 pass
-
-        if request.user.is_authenticated:
-            return Response(
-                {"detail": "User is already logged in."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -60,15 +56,22 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get("refreshToken")
+
+        # If a refresh token is present, check if it's valid and if so, new access token
         if refresh_token:
             try:
-                RefreshToken(refresh_token).verify()
+                refresh = RefreshToken(refresh_token)
+                token_user_id = refresh.payload.get("user_id")
+                user = get_user_model().objects.get(id=token_user_id)
+                access_token = str(refresh.access_token)
                 return Response(
-                    {"detail": "User is already logged in."},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    {
+                        "user": {"username": user.username},
+                        "access": access_token,
+                    },
+                    status=status.HTTP_200_OK,
                 )
-            except TokenError:
-                # Token is invalid or expired, proceed with login
+            except (TokenError, get_user_model().DoesNotExist):
                 pass
 
         serializer = self.get_serializer(data=request.data)
