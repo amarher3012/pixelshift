@@ -1,9 +1,10 @@
-import axios from './axiosConfig'
 import { useForm } from 'react-hook-form'
-import './Auth.css'
 import { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router'
+import { useTranslation } from 'react-i18next'
+
+import axios from './axiosConfig'
+import { useAuth } from '../context/authUtils'
 
 type Inputs = {
     name: string
@@ -11,10 +12,11 @@ type Inputs = {
     image: FileList
     quality: number
     is_public: boolean
-    description: string // Add this new field
+    description: string
 }
 
 export default function Upload() {
+    const { t } = useTranslation()
     const { isAuthenticated } = useAuth()
     const navigate = useNavigate()
 
@@ -37,7 +39,6 @@ export default function Upload() {
         formData.append('image', data.image[0])
         formData.append('quality', data.quality.toString())
         formData.append('description', data.description)
-        // Set is_public to true for guest users, otherwise use form value
         formData.append(
             'is_public',
             isAuthenticated ? data.is_public.toString() : 'true'
@@ -61,11 +62,24 @@ export default function Upload() {
                 navigate(`/images/${response.data.id}`)
             })
             .catch((err) => {
-                if (err.response?.status === 401) {
-                    setIsRefreshing(true)
-                    setError('Refreshing authentication...')
+                if (err.response?.data?.error) {
+                    if (
+                        err.response.data.error.includes(
+                            'Guests can only upload'
+                        )
+                    ) {
+                        setError(t('upload.errors.guestLimit'))
+                    } else if (
+                        err.response.data.error.includes(
+                            'Free users can only upload'
+                        )
+                    ) {
+                        setError(t('upload.errors.freeLimit'))
+                    } else {
+                        setError(err.response.data.error)
+                    }
                 } else {
-                    setError(err.response?.data?.detail || 'Upload failed')
+                    setError(t('upload.errors.uploadFailed'))
                 }
                 console.error('Upload error:', err.response?.data)
             })
@@ -77,37 +91,38 @@ export default function Upload() {
     return (
         <div className="flex flex-col gap-4">
             <div>
-                <h2 className="text-xl font-bold text-white">Upload Image</h2>
+                <h2 className="text-xl font-bold text-white">
+                    {t('upload.title')}
+                </h2>
             </div>
             {error && (
                 <div className="text-red-500 mb-4 text-center">{error}</div>
             )}
             {isRefreshing && (
                 <div className="text-amber-500 mb-4 text-center">
-                    Refreshing token...
+                    {t('upload.refreshing')}
                 </div>
             )}
             <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="flex flex-col gap-4"
             >
-                {/* TODO: create input components for reusability */}
                 <div className="flex flex-col gap-0">
                     <input
-                        placeholder="Name"
+                        placeholder={t('upload.name')}
                         {...register('name', { required: true })}
                         className="p-2 rounded-xl border border-neutral-300 focus:outline-none focus:border-[#aa6ced] shadow-sm transition placeholder:text-neutral-300"
                     />
                     {errors.name && (
                         <span className="text-red-500 text-sm pl-2">
-                            This field is required
+                            {t('upload.nameRequired')}
                         </span>
                     )}
                 </div>
 
-                <div className="flex flex-col gap-0">
+                <div className="flex flex-col gap-0 bg-none">
                     <textarea
-                        placeholder="Description (optional)"
+                        placeholder={t('upload.description')}
                         {...register('description')}
                         className="p-2 rounded-xl border border-neutral-300 focus:outline-none focus:border-[#aa6ced] shadow-sm transition placeholder:text-neutral-300 resize-none h-24"
                     />
@@ -128,7 +143,7 @@ export default function Upload() {
 
                 <div className="flex flex-col gap-0">
                     <input
-                        placeholder="Quality (1-100)"
+                        placeholder={t('upload.quality')}
                         type="number"
                         {...register('quality', {
                             required: true,
@@ -139,15 +154,16 @@ export default function Upload() {
                     />
                     {errors.quality && (
                         <span className="text-red-500 text-sm pl-2">
-                            Quality must be between 1–100
+                            {t('upload.qualityError')}
                         </span>
                     )}
                 </div>
 
-                {/* Show save permanently only if authenticated */}
                 {isAuthenticated && (
                     <div className="flex items-center gap-3">
-                        <span className="text-sm">Save permanently?</span>
+                        <span className="text-sm">
+                            {t('upload.savePermanently')}
+                        </span>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
@@ -160,10 +176,11 @@ export default function Upload() {
                     </div>
                 )}
 
-                {/* Add public/private toggle for authenticated users, hidden for guests */}
                 {isAuthenticated ? (
                     <div className="flex items-center gap-3">
-                        <span className="text-sm">Make public?</span>
+                        <span className="text-sm">
+                            {t('upload.makePublic')}
+                        </span>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
@@ -179,7 +196,11 @@ export default function Upload() {
 
                 <input
                     type="submit"
-                    value={isUploading ? 'Uploading...' : 'Upload!'}
+                    value={
+                        isUploading
+                            ? t('upload.uploading')
+                            : t('upload.uploadButton')
+                    }
                     disabled={isUploading}
                     className="border border-neutral-800 bg-[#aa6ced] text-shadow-xl rounded-lg p-2 text-shadow-neutral-500 text-shadow-lg disabled:opacity-50"
                 />

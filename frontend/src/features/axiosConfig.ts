@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-// axios.defaults.baseURL = 'https://api.axmh.tech/api/'
-axios.defaults.baseURL = 'http://127.0.0.1:8000/api' // Testing
+axios.defaults.baseURL = 'https://api.axmh.tech/api/'
+// axios.defaults.baseURL = 'http://127.0.0.1:8000/api' // Testing
 axios.defaults.withCredentials = true
 
 const token = localStorage.getItem('accessToken')

@@ -28,14 +28,15 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["api.axmh.tech"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "gunicorn",
     "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -100,28 +101,28 @@ STORAGES = {
         "OPTIONS": {
             "bucket_name": "pixelshift-storage",
             "location": "static",
-            "use_ssl": False,
+            # "use_ssl": False,
         },
     },
 }
 
 # Testing
-AWS_ACCESS_KEY_ID = "test"
-AWS_SECRET_ACCESS_KEY = "test"
-AWS_S3_ENDPOINT_URL = "http://localhost:4566"
-AWS_S3_REGION_NAME = "us-east-1"
-AWS_S3_USE_SSL = False
-AWS_S3_VERIFY = False
-AWS_S3_ADDRESSING_STYLE = "path"
-AWS_S3_SIGNATURE_VERSION = "s3v4"
+# AWS_ACCESS_KEY_ID = "test"
+# AWS_SECRET_ACCESS_KEY = "test"
+# AWS_S3_ENDPOINT_URL = "http://localhost:4566"
+# AWS_S3_REGION_NAME = "us-east-1"
+# AWS_S3_USE_SSL = False
+# AWS_S3_VERIFY = False
+# AWS_S3_ADDRESSING_STYLE = "path"
+# AWS_S3_SIGNATURE_VERSION = "s3v4"
 
 # AWS S3 Settings
-# AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-# AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-# AWS_SESSION_TOKEN = os.getenv('AWS_SESSION_TOKEN')
-# AWS_S3_REGION_NAME = "us-east-1"
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")
+AWS_S3_REGION_NAME = "us-east-1"
 
-AWS_S3_VERIFY = False  # Only for development!
+AWS_S3_VERIFY = True
 AWS_S3_FILE_OVERWRITE = False
 
 
@@ -133,8 +134,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": "db",
+        "PORT": "5432",
     }
 }
 

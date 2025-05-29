@@ -1,1 +1,38 @@
 @import 'tailwindcss';
+
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #382f3c;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.auth-input {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: #2d262f;
+    border: 1px solid #503b5e;
+    color: rgba(255, 255, 255, 0.87);
+}
+
+.auth-button {
+    padding: 0.75rem;
+    background: #aa6ced;
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.auth-button:hover {
+    background: #915ace;
+}

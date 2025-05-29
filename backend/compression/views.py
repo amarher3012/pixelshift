@@ -2,7 +2,8 @@ import uuid
 from rest_framework import status, generics
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
+from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
 from django.db import models
 
@@ -80,9 +81,15 @@ class ImageCompressionView(generics.ListCreateAPIView):
             else:
                 compressed_image_instance["guest_user"] = guest_user.pk
 
-            # Save via serializer
             serializer = self.get_serializer(data=compressed_image_instance)
             if serializer.is_valid():
+                try:
+                    quality = int(quality)
+                    if not (1 <= quality <= 100):
+                        raise ValueError("Quality must be between 1 and 100")
+                except (TypeError, ValueError):
+                    quality = 75  # default if invalid
+
                 serializer.save(quality=quality)
                 response.data = serializer.data
                 response.status_code = status.HTTP_201_CREATED
@@ -106,11 +113,10 @@ class ImageHubView(generics.ListAPIView):
         queryset = CompressedImage.objects.all().order_by("-created_at")
         user = self.request.user
 
+        # Image viewing permissions
         if user.is_authenticated:
-            # Show public images and user's private images
             return queryset.filter(models.Q(is_public=True) | models.Q(user=user))
         else:
-            # Show only public images
             return queryset.filter(is_public=True)
 
     def list(self, request, *args, **kwargs):
@@ -123,13 +129,14 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CompressedImage.objects.all()
     serializer_class = CompressedImageSerializer
     permission_classes = [AllowAny]
+    pagination_class = PageNumberPagination
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         user = request.user
         guest_id = request.COOKIES.get("guest_id")
 
-        # Check if user has permission to edit
+        # Edit permissions
         if user.is_authenticated:
             if instance.user != user:
                 return Response(
@@ -148,7 +155,6 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Only allow updating name and description
         data = request.data.copy()
         allowed_fields = ["name", "description"]
         for key in list(data.keys()):
@@ -166,7 +172,7 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
         user = request.user
         guest_id = request.COOKIES.get("guest_id")
 
-        # Check if user has permission to delete
+        # Delete permissions
         if user.is_authenticated:
             if instance.user != user:
                 return Response(
@@ -194,13 +200,10 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
         guest_id = self.request.COOKIES.get("guest_id")
 
         if user.is_authenticated:
-            # Show public images and user's own images
             return queryset.filter(models.Q(is_public=True) | models.Q(user=user))
         elif guest_id:
-            # Show public images and guest user's own images
             return queryset.filter(
                 models.Q(is_public=True) | models.Q(guest_user__guest_id=guest_id)
             )
 
-        # Show only public images for non-authenticated users without guest_id
         return queryset.filter(is_public=True)

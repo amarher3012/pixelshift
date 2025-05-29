@@ -39,4 +39,22 @@ class CompressedImageSerializer(serializers.ModelSerializer):
         if not image:
             raise serializers.ValidationError("An image must be provided.")
 
+        # Validate quality
+        quality = data.get("quality")
+        if quality is not None:
+            try:
+                quality = int(quality)
+                if not (1 <= quality <= 100):
+                    raise serializers.ValidationError(
+                        "Quality must be between 1 and 100"
+                    )
+            except (TypeError, ValueError):
+                raise serializers.ValidationError("Quality must be a valid integer")
+
         return data
+
+    def save(self, **kwargs):
+        instance = super().save(**kwargs)
+        if "quality" in kwargs:
+            instance.save(quality=kwargs["quality"])
+        return instance

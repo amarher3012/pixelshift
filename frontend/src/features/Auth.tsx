@@ -1,9 +1,9 @@
-import axios, { cleanupAuth } from './axiosConfig'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { useState } from 'react'
-import { useAuth } from '../context/AuthContext'
-import { ApiError } from '../types/errors'
+
+import axios, { cleanupAuth } from './axiosConfig'
+import { useAuth } from '../context/authUtils'
 
 // Type
 type Inputs = {
@@ -13,14 +13,11 @@ type Inputs = {
     password2: string
 }
 
-const errorTypes = {
-    isAuthenticated: 'User is already logged in.',
-    tokenExpired: 'Token has expired',
-}
-
 // Forms
 export function Register() {
+    const { setIsAuthenticated, setUsername } = useAuth()
     const [success, setSuccess] = useState<boolean>(false)
+    const [_error, setError] = useState<string>('')
     const {
         register,
         handleSubmit,
@@ -30,6 +27,7 @@ export function Register() {
 
     const navigate = useNavigate()
     const onSubmit: SubmitHandler<Inputs> = (data) => {
+        setError('')
         axios
             .post('accounts/register/', {
                 username: data.username,
@@ -37,15 +35,27 @@ export function Register() {
                 password: data.password,
                 password2: data.password2,
             })
-            .then((_response) => {
+            .then((response) => {
+                const accessToken = response.data.access
+                localStorage.setItem('accessToken', accessToken)
+                localStorage.setItem('username', data.username)
+                axios.defaults.headers.common[
+                    'Authorization'
+                ] = `Bearer ${accessToken}`
+                setIsAuthenticated(true)
+                setUsername(data.username)
                 setSuccess(true)
                 setTimeout(() => {
-                    navigate('/login')
+                    navigate('/')
                 }, 2000)
             })
             .catch((err) => {
-                if (err.response?.data?.detail === errorTypes.isAuthenticated) {
-                    navigate('/upload')
+                if (err.response?.data?.detail) {
+                    setError(err.response.data.detail)
+                } else if (err.response?.data?.password) {
+                    setError(err.response.data.password[0])
+                } else {
+                    setError('Registration failed. Please try again.')
                 }
             })
     }
@@ -121,7 +131,7 @@ export function Register() {
 }
 
 export function Login() {
-    const { setIsAuthenticated } = useAuth()
+    const { setIsAuthenticated, setUsername } = useAuth()
     const [loginError, setLoginError] = useState<string>('')
     const [isLoading, setIsLoading] = useState(false)
     const {
@@ -134,9 +144,6 @@ export function Login() {
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
         setIsLoading(true)
         setLoginError('')
-
-        // Clean up any existing auth state before attempting login
-        await cleanupAuth()
 
         axios
             .post('accounts/login/', {
@@ -151,19 +158,14 @@ export function Login() {
                     'Authorization'
                 ] = `Bearer ${accessToken}`
                 setIsAuthenticated(true)
+                setUsername(data.username)
                 navigate('/')
             })
             .catch((err) => {
-                if (err.response?.status === 400) {
-                    setLoginError(
-                        err.response.data.detail ===
-                            'User is already logged in.'
-                            ? 'You are already logged in. Please log out first.'
-                            : err.response.data.detail || 'Invalid credentials'
-                    )
-                } else {
-                    setLoginError('An error occurred during login')
-                }
+                setLoginError(
+                    err.response?.data?.detail ||
+                        'An error occurred during login'
+                )
                 setIsLoading(false)
             })
     }
@@ -217,7 +219,7 @@ export function Login() {
                     <h2 className="text-xl mb-4">Continue as Guest</h2>
                     <button
                         onClick={handleGuestUpload}
-                        className="border bg-neutral-700 text-white p-2 rounded-lg hover:bg-neutral-600"
+                        className="px-4 py-2 bg-[#aa6ced] text-white rounded-lg hover:bg-[#915ace] transition-colors cursor-pointer"
                     >
                         Upload without account
                     </button>
