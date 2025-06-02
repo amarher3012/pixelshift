@@ -106,24 +106,27 @@ STORAGES = {
     },
 }
 
-# Testing
-# AWS_ACCESS_KEY_ID = "test"
-# AWS_SECRET_ACCESS_KEY = "test"
-# AWS_S3_ENDPOINT_URL = "http://localhost:4566"
-# AWS_S3_REGION_NAME = "us-east-1"
-# AWS_S3_USE_SSL = False
-# AWS_S3_VERIFY = False
-# AWS_S3_ADDRESSING_STYLE = "path"
-# AWS_S3_SIGNATURE_VERSION = "s3v4"
-
 # AWS S3 Settings
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")
-AWS_S3_REGION_NAME = "us-east-1"
+TESTING = os.getenv("TESTING", "False") == "True"
 
-AWS_S3_VERIFY = True
-AWS_S3_FILE_OVERWRITE = False
+if TESTING:
+    AWS_ACCESS_KEY_ID = "test"
+    AWS_SECRET_ACCESS_KEY = "test"
+    AWS_S3_ENDPOINT_URL = "http://localhost:4566"
+    AWS_S3_REGION_NAME = "us-east-1"
+    AWS_S3_USE_SSL = False
+    AWS_S3_VERIFY = False
+    AWS_S3_ADDRESSING_STYLE = "path"
+    AWS_S3_SIGNATURE_VERSION = "s3v4"
+    AWS_S3_QUERYSTRING_AUTH = False  # Disable query string authentication
+else:
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")
+    AWS_S3_REGION_NAME = "us-east-1"
+    AWS_S3_VERIFY = True
+    AWS_S3_QUERYSTRING_AUTH = False  # Disable query string authentication
+    AWS_S3_FILE_OVERWRITE = False
 
 
 WSGI_APPLICATION = "config.wsgi.application"

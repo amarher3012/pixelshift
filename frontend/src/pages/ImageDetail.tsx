@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 
 import axios from '../features/axiosConfig'
 import { ApiError } from '../types/errors'
@@ -22,6 +23,7 @@ interface ImageDetail {
 }
 
 export default function ImageDetail() {
+    const { t } = useTranslation()
     const { id } = useParams()
     const [searchParams] = useSearchParams()
     const [image, setImage] = useState<ImageDetail | null>(null)
@@ -31,6 +33,7 @@ export default function ImageDetail() {
     const [isEditing, setIsEditing] = useState(false)
     const [editedName, setEditedName] = useState('')
     const [editedDescription, setEditedDescription] = useState('')
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
     const navigate = useNavigate()
     const { isAuthenticated } = useAuth()
 
@@ -44,12 +47,14 @@ export default function ImageDetail() {
                 setError('')
             })
             .catch((err: ApiError) => {
-                setError(err.response?.data?.detail || 'Failed to load image')
+                setError(
+                    err.response?.data?.detail || t('imageDetail.failedToLoad')
+                )
             })
             .finally(() => {
                 setIsLoading(false)
             })
-    }, [id])
+    }, [id, t])
 
     useEffect(() => {
         const groupParam = searchParams.get('group')
@@ -67,6 +72,15 @@ export default function ImageDetail() {
             })
         }
     }, [searchParams])
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768)
+        }
+
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
 
     const handleEdit = async () => {
         try {
@@ -88,14 +102,13 @@ export default function ImageDetail() {
         } catch (err: unknown) {
             setError(
                 (err as ApiError).response?.data?.detail ||
-                    'Failed to update image'
+                    t('imageDetail.failedToUpdate')
             )
         }
     }
 
     const handleDelete = async () => {
-        if (!window.confirm('Are you sure you want to delete this image?'))
-            return
+        if (!window.confirm(t('imageDetail.deleteConfirm'))) return
 
         try {
             await axios.delete(`compression/images/${id}/`)
@@ -103,7 +116,7 @@ export default function ImageDetail() {
         } catch (err: unknown) {
             setError(
                 (err as ApiError).response?.data?.detail ||
-                    'Failed to delete image'
+                    t('imageDetail.failedToDelete')
             )
         }
     }
@@ -125,7 +138,7 @@ export default function ImageDetail() {
     }
 
     if (isLoading) {
-        return <div className="text-center">Loading...</div>
+        return <div className="text-center">{t('imageDetail.loading')}</div>
     }
 
     if (error) {
@@ -133,7 +146,9 @@ export default function ImageDetail() {
     }
 
     if (!image) {
-        return <div className="text-center">Image not found</div>
+        return (
+            <div className="text-center">{t('imageDetail.imageNotFound')}</div>
+        )
     }
 
     return (
@@ -143,7 +158,7 @@ export default function ImageDetail() {
                     onClick={() => navigate('/images')}
                     className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors mb-4 cursor-pointer"
                 >
-                    <span aria-hidden="true">←</span> Back to gallery
+                    <span aria-hidden="true">←</span> {t('imageHub.back')}
                 </button>
             </div>
             {isEditing ? (
@@ -157,7 +172,7 @@ export default function ImageDetail() {
                     <textarea
                         value={editedDescription}
                         onChange={(e) => setEditedDescription(e.target.value)}
-                        placeholder="Add a description..."
+                        placeholder={t('imageDetail.addDescription')}
                         className="w-full max-w-md h-32 bg-black/25 p-2 rounded-lg resize-none"
                     />
                 </>
@@ -172,10 +187,10 @@ export default function ImageDetail() {
                 </>
             )}
             <p className="text-neutral-400">
-                Uploaded by {image.creator}
+                {t('imageDetail.uploadedBy')} {image.creator}
                 {image.user_details?.is_premium && (
                     <span className="ml-2 px-2 py-1 bg-[#aa6ced] text-white text-xs rounded-full">
-                        Premium
+                        {t('imageDetail.premium')}
                     </span>
                 )}
             </p>
@@ -193,13 +208,13 @@ export default function ImageDetail() {
                                 onClick={handleEdit}
                                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer"
                             >
-                                Save
+                                {t('imageDetail.save')}
                             </button>
                             <button
                                 onClick={() => setIsEditing(false)}
                                 className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 cursor-pointer"
                             >
-                                Cancel
+                                {t('imageDetail.cancel')}
                             </button>
                         </>
                     ) : (
@@ -214,12 +229,12 @@ export default function ImageDetail() {
                                 }}
                                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer"
                             >
-                                Edit
+                                {t('imageDetail.edit')}
                             </button>
                             <button
                                 onClick={handleDelete}
                                 className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 cursor-pointer"
-                                title="Delete image"
+                                title={t('imageDetail.delete')}
                             >
                                 <TrashIcon />
                             </button>
@@ -228,12 +243,19 @@ export default function ImageDetail() {
                 </div>
             )}
             <div className="mt-4 text-sm text-gray-500">
-                <p>Quality: {image.quality}%</p>
-                <p>Uploaded: {new Date(image.created_at).toLocaleString()}</p>
+                <p>
+                    {t('imageDetail.quality')}: {image.quality}%
+                </p>
+                <p>
+                    {t('imageDetail.uploaded')}:{' '}
+                    {new Date(image.created_at).toLocaleString()}
+                </p>
             </div>
             {groupImages.length > 1 && (
                 <div className="w-full max-w-5xl mt-8">
-                    <h2 className="text-xl font-bold mb-4">Related Images</h2>
+                    <h2 className="text-xl font-bold mb-4">
+                        {t('imageDetail.relatedImages')}
+                    </h2>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {groupImages.map((img) => (
                             <Link
@@ -241,7 +263,11 @@ export default function ImageDetail() {
                                 to={`/images/${img.id}?group=${searchParams.get(
                                     'group'
                                 )}`}
-                                className={`block bg-black/25 backdrop-blur-sm rounded-lg overflow-hidden hover:scale-105 transition-transform ${
+                                className={`block ${
+                                    isMobile
+                                        ? 'bg-[#2d262f]'
+                                        : 'bg-black/25 backdrop-blur-sm'
+                                } rounded-lg overflow-hidden hover:scale-105 transition-transform ${
                                     img.id === Number(id)
                                         ? 'ring-2 ring-[#aa6ced]'
                                         : ''

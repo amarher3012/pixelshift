@@ -2,7 +2,7 @@ import uuid
 from rest_framework import status, generics
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
 from django.db import models
@@ -207,3 +207,13 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
             )
 
         return queryset.filter(is_public=True)
+
+
+class UserImagesView(generics.ListAPIView):
+    serializer_class = CompressedImageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return CompressedImage.objects.filter(user=self.request.user).order_by(
+            "-created_at"
+        )

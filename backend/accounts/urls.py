@@ -1,6 +1,6 @@
 from django.urls import path
 
-from accounts.views import RegisterView, LoginView, LogoutView, CookieTokenRefreshView
+from accounts.views import RegisterView, LoginView, LogoutView, CookieTokenRefreshView, ProfileView
 
 
 urlpatterns = [
@@ -8,4 +8,5 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
+    path("profile/", ProfileView.as_view(), name="profile"),
 ]

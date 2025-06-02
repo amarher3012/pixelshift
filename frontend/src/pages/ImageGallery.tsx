@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router'
+import { useTranslation } from 'react-i18next'
 
 import axios from '../features/axiosConfig'
 import { ApiError } from '../types/errors'
@@ -33,24 +34,38 @@ function FilterBar({
     isVisible: boolean
     onToggleVisibility: () => void
 }) {
+    const { t } = useTranslation()
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768)
+        }
+
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
+
     return (
         <div className="sticky top-20 z-40 mb-6">
             <button
                 onClick={onToggleVisibility}
-                className="md:hidden w-full p-4 bg-black/25 backdrop-blur-sm rounded-lg mb-2 text-left flex justify-between items-center"
+                className={`md:hidden w-full p-4 ${
+                    isMobile ? 'bg-[#2d262f]' : 'bg-black/25 backdrop-blur-sm'
+                } rounded-lg mb-2 text-left flex justify-between items-center`}
             >
-                <span>Filters</span>
+                <span>{t('imageHub.filters')}</span>
                 <span>{isVisible ? '↑' : '↓'}</span>
             </button>
             <div
-                className={`${
-                    isVisible ? 'block' : 'hidden'
-                } md:block p-4 bg-black/25 backdrop-blur-sm rounded-lg`}
+                className={`${isVisible ? 'block' : 'hidden'} md:block p-4 ${
+                    isMobile ? 'bg-[#2d262f]' : 'bg-black/25 backdrop-blur-sm'
+                } rounded-lg`}
             >
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <input
                         type="text"
-                        placeholder="Filter by name..."
+                        placeholder={t('imageHub.filterByName')}
                         value={filters.name}
                         onChange={(e) =>
                             onFilterChange({ ...filters, name: e.target.value })
@@ -59,7 +74,7 @@ function FilterBar({
                     />
                     <input
                         type="text"
-                        placeholder="Filter by creator..."
+                        placeholder={t('imageHub.filterByCreator')}
                         value={filters.creator}
                         onChange={(e) =>
                             onFilterChange({
@@ -80,10 +95,18 @@ function FilterBar({
                         }
                         className="p-2 rounded-lg bg-black/25 border border-neutral-700 focus:border-[#aa6ced] outline-none"
                     >
-                        <option value="all">All time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This week</option>
-                        <option value="month">This month</option>
+                        <option value="all">
+                            {t('imageHub.dateRange.all')}
+                        </option>
+                        <option value="today">
+                            {t('imageHub.dateRange.today')}
+                        </option>
+                        <option value="week">
+                            {t('imageHub.dateRange.week')}
+                        </option>
+                        <option value="month">
+                            {t('imageHub.dateRange.month')}
+                        </option>
                     </select>
                     <select
                         value={filters.sortBy}
@@ -95,9 +118,15 @@ function FilterBar({
                         }
                         className="p-2 rounded-lg bg-black/25 border border-neutral-700 focus:border-[#aa6ced] outline-none"
                     >
-                        <option value="newest">Newest first</option>
-                        <option value="oldest">Oldest first</option>
-                        <option value="name">Name A-Z</option>
+                        <option value="newest">
+                            {t('imageHub.sortBy.newest')}
+                        </option>
+                        <option value="oldest">
+                            {t('imageHub.sortBy.oldest')}
+                        </option>
+                        <option value="name">
+                            {t('imageHub.sortBy.name')}
+                        </option>
                     </select>
                 </div>
             </div>
@@ -106,6 +135,7 @@ function FilterBar({
 }
 
 export default function ImageHub() {
+    const { t } = useTranslation()
     const [images, setImages] = useState<ImageItem[]>([])
     const [error, setError] = useState<string>('')
     const [isLoading, setIsLoading] = useState(true)
@@ -118,6 +148,16 @@ export default function ImageHub() {
         dateRange: 'all',
         sortBy: 'newest',
     })
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768)
+        }
+
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
 
     useEffect(() => {
         axios
@@ -205,7 +245,7 @@ export default function ImageHub() {
     }, [filters])
 
     if (isLoading) {
-        return <div className="text-center mt-20">Loading...</div>
+        return <div className="text-center mt-20">{t('common.loading')}</div>
     }
 
     if (error) {
@@ -215,7 +255,7 @@ export default function ImageHub() {
     return (
         <div className="container mx-auto px-4 my-5 min-h-[calc(100vh-8rem)]">
             <div className="space-y-6">
-                <h1 className="text-2xl font-bold">Image Gallery</h1>
+                <h1 className="text-2xl font-bold">{t('imageHub.title')}</h1>
                 <FilterBar
                     filters={filters}
                     onFilterChange={setFilters}
@@ -229,7 +269,11 @@ export default function ImageHub() {
                         <Link
                             key={image.id}
                             to={`/images/${image.id}`}
-                            className="block bg-black/25 backdrop-blur-sm rounded-lg overflow-hidden hover:transform hover:scale-105 transition-transform"
+                            className={`block ${
+                                isMobile
+                                    ? 'bg-[#2d262f]'
+                                    : 'bg-black/25 backdrop-blur-sm'
+                            } rounded-lg overflow-hidden hover:transform hover:scale-105 transition-transform`}
                         >
                             <img
                                 src={image.image}
@@ -246,7 +290,8 @@ export default function ImageHub() {
                                     </p>
                                 )}
                                 <p className="text-sm text-neutral-400 mt-2">
-                                    By {image.creator}
+                                    {t('imageDetail.uploadedBy')}{' '}
+                                    {image.creator}
                                 </p>
                             </div>
                         </Link>
@@ -257,26 +302,37 @@ export default function ImageHub() {
                         <button
                             onClick={() => setCurrentPage(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="px-4 py-2 rounded-lg bg-black/25 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            className={`px-4 py-2 rounded-lg ${
+                                isMobile
+                                    ? 'bg-[#2d262f]'
+                                    : 'bg-black/25 backdrop-blur-sm'
+                            } disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
                         >
-                            Previous
+                            {t('imageHub.pagination.previous')}
                         </button>
                         <div className="flex items-center px-4">
-                            Page {currentPage} of {pageCount}
+                            {t('imageHub.pagination.page', {
+                                current: currentPage,
+                                total: pageCount,
+                            })}
                         </div>
                         <button
                             onClick={() => setCurrentPage(currentPage + 1)}
                             disabled={currentPage === pageCount}
-                            className="px-4 py-2 rounded-lg bg-black/25 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            className={`px-4 py-2 rounded-lg ${
+                                isMobile
+                                    ? 'bg-[#2d262f]'
+                                    : 'bg-black/25 backdrop-blur-sm'
+                            } disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
                         >
-                            Next
+                            {t('imageHub.pagination.next')}
                         </button>
                     </div>
                 )}
             </div>
             {paginatedImages.length === 0 && !isLoading && !error && (
                 <div className="text-center text-gray-500 mt-8">
-                    No images found matching your filters
+                    {t('imageHub.noImages')}
                 </div>
             )}
         </div>

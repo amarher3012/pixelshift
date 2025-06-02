@@ -17,7 +17,7 @@ export default function Info() {
                         </p>
                     </div>
                     <img
-                        src="static/images/info1"
+                        src="https://pixelshift-storage.s3.us-east-1.amazonaws.com/static/images/info1.webp"
                         alt={t('info.first.title')}
                         className="w-full max-w-[300px] h-[200px] object-cover rounded-lg mx-auto order-1 md:order-2"
                     />
@@ -26,7 +26,7 @@ export default function Info() {
             <div className="w-full min-h-[400px] bg-[#23182c] px-4 py-20">
                 <div className="lg:w-2/4 sm:w-3/4 mx-auto grid md:grid-cols-2 gap-8 items-center">
                     <img
-                        src="static/images/info2"
+                        src="https://pixelshift-storage.s3.us-east-1.amazonaws.com/static/images/info2.webp"
                         alt={t('info.second.title')}
                         className="w-full max-w-[300px] h-[200px] object-cover rounded-lg mx-auto order-1"
                     />
@@ -51,7 +51,7 @@ export default function Info() {
                         </p>
                     </div>
                     <img
-                        src="static/images/info3"
+                        src="https://pixelshift-storage.s3.us-east-1.amazonaws.com/static/images/info3.webp"
                         alt={t('info.third.title')}
                         className="w-full max-w-[300px] h-[200px] object-cover rounded-lg mx-auto order-1 md:order-2"
                     />
