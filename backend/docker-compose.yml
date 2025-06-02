@@ -1,14 +1,54 @@
 services:
-    localstack:
-        container_name: '${LOCALSTACK_DOCKER_NAME:-localstack-main}'
-        image: localstack/localstack
+    web:
+        image: amarher/backend-web:latest
+        depends_on:
+            - db
+        # volumes:
+        #     - .:/app
         ports:
-            - '127.0.0.1:4566:4566' # LocalStack Gateway
-            - '127.0.0.1:4510-4559:4510-4559' # external services port range
-        environment:
-            - DEBUG=${DEBUG:-0}
-            - PERSISTANCE=${PERSISTANCE:-0}
-            - SERVICES=${SERVICES:-s3}
+            - '8000:8000'
+        labels:
+            - 'traefik.enable=true'
+            - 'traefik.http.routers.web.rule=Host(`api.axmh.tech`)'
+            - 'traefik.http.routers.web.tls=true'
+            - 'traefik.http.routers.web.tls.certresolver=myresolver'
+        env_file:
+            - .env
+
+    db:
+        image: postgres:latest
         volumes:
-            - '${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack'
-            - '/var/run/docker.sock:/var/run/docker.sock'
+            - db_data:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        ports:
+            - '5432:5432'
+    traefik:
+        image: traefik:v2.10
+        depends_on:
+            - web
+        ports:
+            - '80:80'
+            - '443:443'
+            - '8080:8080'
+        volumes:
+            - '/var/run/docker.sock:/var/run/docker.sock:ro'
+            - './letsencrypt:/letsencrypt'
+        command:
+            - '--api.insecure=true'
+            - '--providers.docker=true'
+            - '--providers.docker.exposedbydefault=false'
+            - '--entrypoints.web.address=:80'
+            - '--entrypoints.websecure.address=:443'
+            - '--entrypoints.web.http.redirections.entrypoint.to=websecure'
+            - '--entrypoints.web.http.redirections.entrypoint.scheme=https'
+            - '--certificatesresolvers.myresolver.acme.tlschallenge=true'
+            - '--certificatesresolvers.myresolver.acme.email=${CERT_EMAIL}'
+            - '--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json'
+        env_file:
+            - .env
+
+volumes:
+    db_data:

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,14 +28,16 @@ load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["api.axmh.tech"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "gunicorn",
+    "corsheaders",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -42,12 +45,15 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "accounts",
     "compression",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -75,6 +81,9 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }
@@ -83,21 +92,41 @@ STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "bucket_name": "pixelshift",
-            "location": "uploads",
+            "bucket_name": "pixelshift-storage",
+            "location": "pixelshift",
         },
     },
     "staticfiles": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "bucket_name": "pixelshift",
+            "bucket_name": "pixelshift-storage",
             "location": "static",
+            # "use_ssl": False,
         },
     },
 }
 
-AWS_S3_ENDPOINT_URL = "http://localhost:4566"
-AWS_S3_FILE_OVERWRITE = False
+# AWS S3 Settings
+TESTING = os.getenv("TESTING", "False") == "True"
+
+if TESTING:
+    AWS_ACCESS_KEY_ID = "test"
+    AWS_SECRET_ACCESS_KEY = "test"
+    AWS_S3_ENDPOINT_URL = "http://localhost:4566"
+    AWS_S3_REGION_NAME = "us-east-1"
+    AWS_S3_USE_SSL = False
+    AWS_S3_VERIFY = False
+    AWS_S3_ADDRESSING_STYLE = "path"
+    AWS_S3_SIGNATURE_VERSION = "s3v4"
+    AWS_S3_QUERYSTRING_AUTH = False  # Disable query string authentication
+else:
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")
+    AWS_S3_REGION_NAME = "us-east-1"
+    AWS_S3_VERIFY = True
+    AWS_S3_QUERYSTRING_AUTH = False  # Disable query string authentication
+    AWS_S3_FILE_OVERWRITE = False
 
 
 WSGI_APPLICATION = "config.wsgi.application"
@@ -108,11 +137,16 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": "db",
+        "PORT": "5432",
     }
 }
 
+AUTH_USER_MODEL = "accounts.User"
 AUTH_USER_MODEL = "accounts.User"
 
 # Password validation
@@ -155,3 +189,27 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://axmh.tech",
+    "https://api.axmh.tech",
+    "http://localhost:5173",
+    "http://127.0.0.1:8000",
+    "http://localhost:4566",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://axmh.tech",
+    "https://api.axmh.tech",
+    "http://localhost:5173",
+    "http://127.0.0.1:8000",
+    "http://localhost:4566",
+]
+
+# SimpleJWT
+SIMPLE_JWT = {
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=15),
+}
