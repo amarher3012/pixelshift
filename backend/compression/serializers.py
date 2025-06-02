@@ -31,10 +31,7 @@ class CompressedImageSerializer(serializers.ModelSerializer):
         return "Anonymous"
 
     def validate(self, data):
-        # Don't require image for partial updates (PATCH)
-        if self.partial:
-            return data
-
+        user = data.get("user")
         image = data.get("image")
         if not image:
             raise serializers.ValidationError("An image must be provided.")

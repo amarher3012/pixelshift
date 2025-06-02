@@ -6,9 +6,18 @@ from io import BytesIO
 
 from accounts.models import User, GuestUser
 
+from accounts.models import User, GuestUser
+
 
 # Decides where it goes (perm/temp)
 def get_upload_path(instance, filename):
+    user = (
+        instance.user.id
+        if instance.user
+        else instance.guest_user.guest_id if instance.guest_user else "Null"
+    )
+    prefix = "temp" if instance.temp or instance.guest_user else "perm"
+    return os.path.join(prefix, f"{user}", filename)
     user = (
         instance.user.id
         if instance.user
@@ -29,6 +38,9 @@ class CompressedImage(models.Model):
     image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
     quality = models.IntegerField(default=75)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    guest_user = models.ForeignKey(
+        GuestUser, on_delete=models.SET_NULL, null=True, blank=True
+    )
     guest_user = models.ForeignKey(
         GuestUser, on_delete=models.SET_NULL, null=True, blank=True
     )
