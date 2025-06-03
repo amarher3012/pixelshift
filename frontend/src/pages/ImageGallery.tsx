@@ -300,7 +300,10 @@ export default function ImageHub() {
                 {pageCount > 1 && (
                     <div className="flex justify-center gap-2 mt-8">
                         <button
-                            onClick={() => setCurrentPage(currentPage - 1)}
+                            onClick={() => {
+                                setCurrentPage(currentPage - 1)
+                                window.scrollTo(0, 0)
+                            }}
                             disabled={currentPage === 1}
                             className={`px-4 py-2 rounded-lg ${
                                 isMobile
@@ -317,7 +320,10 @@ export default function ImageHub() {
                             })}
                         </div>
                         <button
-                            onClick={() => setCurrentPage(currentPage + 1)}
+                            onClick={() => {
+                                setCurrentPage(currentPage + 1)
+                                window.scrollTo(0, 0)
+                            }}
                             disabled={currentPage === pageCount}
                             className={`px-4 py-2 rounded-lg ${
                                 isMobile

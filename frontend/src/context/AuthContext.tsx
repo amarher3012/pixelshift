@@ -21,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             cleanupAuth()
             setIsAuthenticated(false)
             setUsername(null)
+            window.location.href = '/login'
         }
     }
 
