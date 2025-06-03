@@ -58,7 +58,6 @@ export default function Profile() {
         const fetchImages = axios
             .get('compression/user-images/')
             .then((response) => {
-                console.log('User images response:', response.data)
                 if (Array.isArray(response.data)) {
                     setUserImages(response.data)
                 } else {

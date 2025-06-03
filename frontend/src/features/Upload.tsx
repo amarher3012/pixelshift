@@ -57,7 +57,6 @@ export default function Upload() {
                 },
             })
             .then((response) => {
-                console.log(response.data)
                 setError('')
                 navigate(`/images/${response.data.id}`)
             })
