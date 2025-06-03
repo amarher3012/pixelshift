@@ -23,6 +23,7 @@ export default function Profile() {
     const { username, isAuthenticated } = useAuth()
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [userImages, setUserImages] = useState<UserImage[]>([])
+    const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
@@ -37,11 +38,12 @@ export default function Profile() {
 
     useEffect(() => {
         if (!isAuthenticated) {
+            setLoading(false)
             return
         }
 
         // Fetch user profile
-        axios
+        const fetchProfile = axios
             .get('accounts/profile/')
             .then((response) => {
                 setProfile(response.data)
@@ -53,14 +55,28 @@ export default function Profile() {
             })
 
         // Fetch user's images
-        axios
+        const fetchImages = axios
             .get('compression/user-images/')
             .then((response) => {
-                setUserImages(Array.isArray(response.data) ? response.data : [])
+                console.log('User images response:', response.data)
+                if (Array.isArray(response.data)) {
+                    setUserImages(response.data)
+                } else {
+                    console.error(
+                        'Expected array but got:',
+                        typeof response.data
+                    )
+                    setUserImages([])
+                }
             })
             .catch((err) => {
                 console.error('Error fetching user images:', err)
+                setUserImages([])
             })
+
+        Promise.all([fetchProfile, fetchImages]).finally(() => {
+            setLoading(false)
+        })
     }, [isAuthenticated])
 
     if (!isAuthenticated) {
@@ -75,6 +91,14 @@ export default function Profile() {
                 >
                     {t('nav.login')}
                 </Link>
+            </div>
+        )
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[50vh]">
+                <p className="text-xl">{t('common.loading')}</p>
             </div>
         )
     }

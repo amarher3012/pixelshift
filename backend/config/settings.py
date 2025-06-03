@@ -118,14 +118,12 @@ if TESTING:
     AWS_S3_VERIFY = False
     AWS_S3_ADDRESSING_STYLE = "path"
     AWS_S3_SIGNATURE_VERSION = "s3v4"
-    AWS_S3_QUERYSTRING_AUTH = False  # Disable query string authentication
 else:
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
     AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")
     AWS_S3_REGION_NAME = "us-east-1"
     AWS_S3_VERIFY = True
-    AWS_S3_QUERYSTRING_AUTH = False  # Disable query string authentication
     AWS_S3_FILE_OVERWRITE = False
 
 
@@ -146,7 +144,6 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "accounts.User"
 AUTH_USER_MODEL = "accounts.User"
 
 # Password validation
