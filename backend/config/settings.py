@@ -124,6 +124,7 @@ else:
     AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")
     AWS_S3_REGION_NAME = "us-east-1"
     AWS_S3_VERIFY = True
+    AWS_QUERYSTRING_AUTH = False
     AWS_S3_FILE_OVERWRITE = False
 
 
