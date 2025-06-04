@@ -6,18 +6,9 @@ from io import BytesIO
 
 from accounts.models import User, GuestUser
 
-from accounts.models import User, GuestUser
-
 
 # Decides where it goes (perm/temp)
 def get_upload_path(instance, filename):
-    user = (
-        instance.user.id
-        if instance.user
-        else instance.guest_user.guest_id if instance.guest_user else "Null"
-    )
-    prefix = "temp" if instance.temp or instance.guest_user else "perm"
-    return os.path.join(prefix, f"{user}", filename)
     user = (
         instance.user.id
         if instance.user
