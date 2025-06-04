@@ -54,12 +54,9 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link
-                                        to="/search"
-                                        className="text-white/60 hover:text-white transition-colors"
-                                    >
-                                        {t('nav.search')}
-                                    </Link>
+                                    <span className="text-white/40 cursor-not-allowed">
+                                        {t('nav.search')} (Coming soon)
+                                    </span>
                                 </li>
                             </ul>
                         </div>

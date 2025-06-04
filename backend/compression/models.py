@@ -28,7 +28,7 @@ class CompressedImage(models.Model):
     temp = models.BooleanField(default=False, null=True)
     image = models.ImageField(upload_to=get_upload_path, blank=True, null=True)
     quality = models.IntegerField(default=75)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     guest_user = models.ForeignKey(
         GuestUser, on_delete=models.SET_NULL, null=True, blank=True
     )

@@ -97,14 +97,15 @@ export default function Navbar() {
                     >
                         {t('nav.gallery')}
                     </NavLink>
-                    <NavLink
-                        to="/search"
-                        className={({ isActive }) =>
-                            isActive ? activeClasses : normalClasses
-                        }
+                    <span
+                        className="text-gray-500 cursor-not-allowed relative group"
+                        title="Coming soon"
                     >
                         {t('nav.search')}
-                    </NavLink>
+                        <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            Coming soon
+                        </span>
+                    </span>
                 </div>
 
                 <div className="hidden md:flex items-center gap-4 w-1/4 justify-end">
@@ -158,15 +159,12 @@ export default function Navbar() {
                                         >
                                             {t('nav.profile')}
                                         </Link>
-                                        <Link
-                                            to="/settings"
-                                            className="block px-4 py-2 text-white hover:bg-[#aa6ced]/20"
-                                            onClick={() =>
-                                                setIsDropdownOpen(false)
-                                            }
+                                        <span
+                                            className="block px-4 py-2 text-gray-500 cursor-not-allowed"
+                                            title="Coming soon"
                                         >
                                             {t('nav.settings')}
-                                        </Link>
+                                        </span>
                                         <button
                                             onClick={() => {
                                                 logout()
@@ -241,19 +239,9 @@ export default function Navbar() {
                                 >
                                     {t('nav.gallery')}
                                 </NavLink>
-                                <NavLink
-                                    to="/search"
-                                    className={({ isActive }) =>
-                                        `${
-                                            isActive
-                                                ? 'text-[#aa6ced]'
-                                                : 'text-white'
-                                        } py-2`
-                                    }
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    {t('nav.search')}
-                                </NavLink>
+                                <span className="text-gray-500 py-2 cursor-not-allowed">
+                                    {t('nav.search')} (Coming soon)
+                                </span>
                             </div>
 
                             <div className="py-2 border-neutral-700">
@@ -289,21 +277,9 @@ export default function Navbar() {
                                     >
                                         {t('nav.profile')}
                                     </NavLink>
-                                    <NavLink
-                                        to="/settings"
-                                        className={({ isActive }) =>
-                                            `${
-                                                isActive
-                                                    ? 'text-[#aa6ced]'
-                                                    : 'text-white'
-                                            } block py-2`
-                                        }
-                                        onClick={() =>
-                                            setIsMobileMenuOpen(false)
-                                        }
-                                    >
-                                        {t('nav.settings')}
-                                    </NavLink>
+                                    <span className="block py-2 text-gray-500 cursor-not-allowed">
+                                        {t('nav.settings')} (Coming soon)
+                                    </span>
                                     <button
                                         onClick={() => {
                                             logout()
