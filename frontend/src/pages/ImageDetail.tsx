@@ -15,6 +15,7 @@ interface ImageDetail {
     created_at: string
     creator: string
     description: string | null
+    temp: boolean
     user_details?: {
         username: string
         email: string
@@ -138,11 +139,17 @@ export default function ImageDetail() {
     }
 
     if (isLoading) {
-        return <div className="text-center">{t('imageDetail.loading')}</div>
+        return (
+            <div className="text-center mt-20">{t('imageDetail.loading')}</div>
+        )
     }
 
     if (error) {
-        return <div className="text-red-500 text-center">{error}</div>
+        return (
+            <div className="text-red-500 text-center mt-20">
+                {t('imageDetail.imageNotFound')}
+            </div>
+        )
     }
 
     if (!image) {
@@ -245,6 +252,12 @@ export default function ImageDetail() {
             <div className="mt-4 text-sm text-gray-500">
                 <p>
                     {t('imageDetail.quality')}: {image.quality}%
+                </p>
+                <p>
+                    {t('imageDetail.storageType')}:{' '}
+                    {image.temp
+                        ? t('imageDetail.temporary')
+                        : t('imageDetail.permanent')}
                 </p>
                 <p>
                     {t('imageDetail.uploaded')}:{' '}

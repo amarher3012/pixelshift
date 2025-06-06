@@ -13,16 +13,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     const logout = async () => {
-        try {
-            await axios.post('accounts/logout/')
-        } catch {
-            // Proceed with cleanup even if logout request fails
-        } finally {
-            cleanupAuth()
-            setIsAuthenticated(false)
-            setUsername(null)
-            window.location.href = '/login'
-        }
+        
+        await axios.post('accounts/logout/')
+
+        cleanupAuth()
+        setIsAuthenticated(false)
+        setUsername(null)
+        window.location.href = '/login'
     }
 
     return (

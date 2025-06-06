@@ -6,6 +6,7 @@ export default {
                 home: 'Home',
                 gallery: 'Gallery',
                 search: 'Search',
+                searchAI: 'AI',
                 upload: 'Upload',
                 login: 'Login',
                 register: 'Register',
@@ -39,17 +40,43 @@ export default {
                 loginError: 'An error occurred during login',
                 joinPixelshift: 'Join PixelShift',
                 loginToPixelshift: 'Login to PixelShift',
-                redirectingHome: 'Registration successful! Redirecting to home...',
+                redirectingHome:
+                    'Registration successful! Redirecting to home...',
             },
             home: {
                 upload: 'Upload an image',
                 or: 'OR',
-                search: 'Search',
+                search: 'View images',
                 description: `PixelShift is a platform that allows you to upload your
                         images, free of charge, to our servers for safekeep or
                         for sharing with your friends. We offer the ability to
                         save permanently or for a period of time. You can also
                         choose when to delete them.`,
+                faq: {
+                    title: 'Frequently Asked Questions',
+                    questions: [
+                        {
+                            question: 'What is PixelShift?',
+                            answer: 'PixelShift is a platform that allows you to upload, store, and share your images. We offer both permanent and temporary storage options with customizable privacy settings.',
+                        },
+                        {
+                            question: 'How does image compression work?',
+                            answer: 'Our compression technology optimizes your images by reducing file size while maintaining visual quality. You can adjust the quality level (1-100) to find the perfect balance between size and clarity.',
+                        },
+                        {
+                            question: 'Is PixelShift free to use?',
+                            answer: 'Yes! PixelShift offers a free tier with generous limits. We also offer a premium subscription for users who need additional features and higher upload limits.',
+                        },
+                        {
+                            question: 'How long are temporary images stored?',
+                            answer: 'Temporary images are stored for 7 days after upload. After this period, they will be automatically deleted from our servers.',
+                        },
+                        {
+                            question: 'Can I delete my uploaded images?',
+                            answer: 'Absolutely! You have full control over your content. You can delete any of your uploaded images at any time from your profile or image detail page.',
+                        },
+                    ],
+                },
             },
             upload: {
                 title: 'Upload Image',
@@ -153,6 +180,9 @@ export default {
                 failedToLoad: 'Failed to load image',
                 failedToUpdate: 'Failed to update image',
                 failedToDelete: 'Failed to delete image',
+                temporary: 'Temporary',
+                permanent: 'Permanent',
+                storageType: 'Storage type',
             },
             common: {
                 loading: 'Loading...',
@@ -166,6 +196,7 @@ export default {
                 home: 'Inicio',
                 gallery: 'Galería',
                 search: 'Buscar',
+                searchAI: 'IA',
                 upload: 'Subir',
                 login: 'Iniciar sesión',
                 register: 'Registrarse',
@@ -185,12 +216,14 @@ export default {
                 emailRequired: 'El correo electrónico es obligatorio',
                 invalidEmail: 'Dirección de correo electrónico inválida',
                 passwordRequired: 'La contraseña es obligatoria',
-                passwordLength: 'La contraseña debe tener al menos 8 caracteres',
+                passwordLength:
+                    'La contraseña debe tener al menos 8 caracteres',
                 confirmPasswordRequired: 'Por favor confirma tu contraseña',
                 passwordsDoNotMatch: 'Las contraseñas no coinciden',
                 registerButton: 'Registrarse',
                 loginButton: 'Iniciar sesión',
-                registerFailed: 'El registro falló. Por favor, inténtalo de nuevo.',
+                registerFailed:
+                    'El registro falló. Por favor, inténtalo de nuevo.',
                 loggingIn: 'Iniciando sesión...',
                 or: 'o',
                 continueAsGuest: 'Continuar como Invitado',
@@ -204,10 +237,37 @@ export default {
             home: {
                 upload: 'Subir una imagen',
                 or: 'O',
-                search: 'Buscar',
+                search: 'Ver imagenes',
                 description: `PixelShift es una plataforma que te permite subir tus imagenes
                 de forma totalmente gratuita para guardar en nuestros servidores o compartir con tus amigos. PixelShift te permite
                 guardar las imagenes de forma permanente o temporalmente. Tambien puedes eliminar imagenes cuando tu decidas.`,
+                faq: {
+                    title: 'Preguntas Frecuentes',
+                    questions: [
+                        {
+                            question: '¿Qué es PixelShift?',
+                            answer: 'PixelShift es una plataforma que te permite subir, almacenar y compartir tus imágenes. Ofrecemos opciones de almacenamiento permanente y temporal con ajustes de privacidad personalizables.',
+                        },
+                        {
+                            question:
+                                '¿Cómo funciona la compresión de imágenes?',
+                            answer: 'Nuestra tecnología de compresión optimiza tus imágenes reduciendo el tamaño del archivo mientras mantiene la calidad visual. Puedes ajustar el nivel de calidad (1-100) para encontrar el equilibrio perfecto entre tamaño y claridad.',
+                        },
+                        {
+                            question: '¿Es PixelShift gratis?',
+                            answer: 'Sí! PixelShift ofrece un nivel gratuito con límites generosos. También ofrecemos una suscripción premium para usuarios que necesitan características adicionales y límites de carga más altos.',
+                        },
+                        {
+                            question:
+                                '¿Cuánto tiempo se almacenan las imágenes temporales?',
+                            answer: 'Las imágenes temporales se almacenan durante 7 días después de la carga. Después de este periodo, se eliminarán automáticamente de nuestros servidores.',
+                        },
+                        {
+                            question: '¿Puedo eliminar mis imágenes subidas?',
+                            answer: 'Por supuesto! Tienes control total sobre tu contenido. Puedes eliminar cualquiera de tus imágenes subidas en cualquier momento desde tu perfil o página de detalles de la imagen.',
+                        },
+                    ],
+                },
             },
             upload: {
                 title: 'Subir Imagen',
@@ -317,6 +377,9 @@ export default {
                 failedToLoad: 'Error al cargar la imagen',
                 failedToUpdate: 'Error al actualizar la imagen',
                 failedToDelete: 'Error al eliminar la imagen',
+                temporary: 'Temporal',
+                permanent: 'Permanente',
+                storageType: 'Tipo de almacenamiento',
             },
             common: {
                 loading: 'Cargando...',

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import FAQ from './FAQ'
 
 export default function Info() {
     const { t } = useTranslation()
@@ -55,6 +56,11 @@ export default function Info() {
                         alt={t('info.third.title')}
                         className="w-full max-w-[300px] h-[200px] object-cover rounded-lg mx-auto order-1 md:order-2"
                     />
+                </div>
+            </div>
+            <div className="w-full min-h-[400px] bg-[#23182c] px-4 py-20">
+                <div className="w-full mx-auto grid gap-8 items-center">
+                    <FAQ />
                 </div>
             </div>
         </div>

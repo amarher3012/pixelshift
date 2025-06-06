@@ -6,6 +6,7 @@ import { useAuth } from '../context/authUtils'
 import Upload from '../features/Upload'
 import { MenuIcon } from '../assets/icons'
 import LanguageSwitcher from './LanguageSwitcher'
+import logo from '../assets/pixelshift.png'
 
 export default function Navbar() {
     const { t } = useTranslation()
@@ -73,14 +74,19 @@ export default function Navbar() {
                 <div className="flex items-center gap-4 w-1/4">
                     <Link
                         to="/"
-                        className="text-2xl font-bold text-white hover:text-[#aa6ced]"
+                        className="flex items-center gap-2 text-2xl font-bold text-white hover:text-[#aa6ced]"
                     >
-                        PixelShift
+                        <img
+                            src={logo}
+                            alt="PixelShift Logo"
+                            className="-mr-3 w-12 h-12"
+                        />
+                        <span>PixelShift</span>
                     </Link>
                 </div>
 
-                {/* Desktop Navbar*/}
-                <div className="hidden md:flex gap-12 absolute left-1/2 transform -translate-x-1/2">
+                {/* Simplified responsive desktop navbar */}
+                <div className="hidden md:flex gap-8 lg:gap-12 md:mx-auto lg:mx-0 md:justify-center lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/2">
                     <NavLink
                         to="/"
                         className={({ isActive }) =>
@@ -102,13 +108,16 @@ export default function Navbar() {
                         title="Coming soon"
                     >
                         {t('nav.search')}
+                        <span className="absolute -top-2.5 -right-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center rotate-12">
+                            {t('nav.searchAI')}
+                        </span>
                         <span className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                             Coming soon
                         </span>
                     </span>
                 </div>
 
-                <div className="hidden md:flex items-center gap-4 w-1/4 justify-end">
+                <div className="hidden md:flex items-center gap-4 min-w-[180px] justify-end">
                     {isAuthenticated && (
                         <div className="relative" ref={uploadRef}>
                             <button
@@ -239,8 +248,11 @@ export default function Navbar() {
                                 >
                                     {t('nav.gallery')}
                                 </NavLink>
-                                <span className="text-gray-500 py-2 cursor-not-allowed">
+                                <span className="text-gray-500 py-2 cursor-not-allowed relative">
                                     {t('nav.search')} (Coming soon)
+                                    <span className="absolute -top-0.5 left-37 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center rotate-12">
+                                        {t('nav.searchAI')}
+                                    </span>
                                 </span>
                             </div>
 

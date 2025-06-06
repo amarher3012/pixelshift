@@ -24,7 +24,7 @@ export default function Home() {
         <>
             <div className="flex flex-col justify-center gap-5 lg:w-1/2 sm:w-3/4 mx-auto p-4 min-h-[calc(100vh-16rem)]">
                 <div className="flex flex-col justify-center gap-5 p-4 rounded-2xl">
-                    <h1 className="text-center text-6xl text-shadow-neutral-800 text-shadow-lg">
+                    <h1 className="text-center text-6xl font-bold gradient-text">
                         PixelShift
                     </h1>
                     <p className="text-shadow-neutral-800 text-shadow-lg">

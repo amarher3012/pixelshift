@@ -229,7 +229,7 @@ export default function Profile() {
                                     <img
                                         src={image.image}
                                         alt={image.name}
-                                        className="w-full h-24 object-cover"
+                                        className="w-full h-12 object-cover"
                                     />
                                     <div className="p-2 bg-black/30 text-xs truncate">
                                         {image.name}

@@ -14,6 +14,7 @@ interface ImageItem {
     creator: string
     is_public: boolean
     description: string | null
+    temp: boolean
 }
 
 interface Filters {
@@ -47,7 +48,7 @@ function FilterBar({
     }, [])
 
     return (
-        <div className="sticky top-20 z-40 mb-6">
+        <div className="sticky top-20 z-40 py-2">
             <button
                 onClick={onToggleVisibility}
                 className={`md:hidden w-full p-4 ${
@@ -289,10 +290,23 @@ export default function ImageHub() {
                                         {image.description}
                                     </p>
                                 )}
-                                <p className="text-sm text-neutral-400 mt-2">
-                                    {t('imageDetail.uploadedBy')}{' '}
-                                    {image.creator}
-                                </p>
+                                <div className="flex justify-between items-center mt-2">
+                                    <p className="text-sm text-neutral-400">
+                                        {t('imageDetail.uploadedBy')}{' '}
+                                        {image.creator}
+                                    </p>
+                                    <span
+                                        className={`text-xs px-2 py-1 rounded-full ${
+                                            image.temp
+                                                ? 'bg-amber-500/80'
+                                                : 'bg-green-500/80'
+                                        } text-white`}
+                                    >
+                                        {image.temp
+                                            ? t('imageDetail.temporary')
+                                            : t('imageDetail.permanent')}
+                                    </span>
+                                </div>
                             </div>
                         </Link>
                     ))}
@@ -309,7 +323,7 @@ export default function ImageHub() {
                                 isMobile
                                     ? 'bg-[#2d262f]'
                                     : 'bg-black/25 backdrop-blur-sm'
-                            } disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+                            } disabled:opacity-50 disabled:hover:bg-black/25 hover:bg-black/60 transition-colors disabled:cursor-not-allowed cursor-pointer`}
                         >
                             {t('imageHub.pagination.previous')}
                         </button>
@@ -329,7 +343,7 @@ export default function ImageHub() {
                                 isMobile
                                     ? 'bg-[#2d262f]'
                                     : 'bg-black/25 backdrop-blur-sm'
-                            } disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer`}
+                            } disabled:opacity-50 disabled:hover:bg-black/25 hover:bg-black/60 transition-colors disabled:cursor-not-allowed cursor-pointer`}
                         >
                             {t('imageHub.pagination.next')}
                         </button>

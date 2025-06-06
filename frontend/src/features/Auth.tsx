@@ -17,7 +17,7 @@ type Inputs = {
 
 // Forms
 export function Register() {
-    const { t } = useTranslation();
+    const { t } = useTranslation()
     const { setIsAuthenticated, setUsername } = useAuth()
     const [success, setSuccess] = useState<boolean>(false)
     const [error, setError] = useState<string>('')
@@ -77,9 +77,7 @@ export function Register() {
         <div className="flex flex-col gap-8 max-w-4xl mx-auto p-8">
             <div
                 className={`flex flex-wrap justify-center gap-8 p-8 ${
-                    isMobile
-                        ? 'bg-[#2d262f]'
-                        : 'bg-[#2d262f]/50 backdrop-blur-md'
+                    isMobile ? 'bg-[#2d262f]' : 'bg-black/25 backdrop-blur-sm'
                 } rounded-xl shadow-lg`}
             >
                 <div className="flex-1 min-w-[280px] max-w-[400px] flex flex-col gap-6">
@@ -106,7 +104,9 @@ export function Register() {
                                     <input
                                         placeholder={t('auth.username')}
                                         {...register('username', {
-                                            required: t('auth.usernameRequired'),
+                                            required: t(
+                                                'auth.usernameRequired'
+                                            ),
                                         })}
                                         className="p-3 rounded-lg bg-[#2d262f] border border-[#503b5e] text-white focus:border-[#aa6ced] focus:shadow-purple-500 focus:shadow-sm transition w-full"
                                     />
@@ -142,10 +142,14 @@ export function Register() {
                                         placeholder={t('auth.password')}
                                         type="password"
                                         {...register('password', {
-                                            required: t('auth.passwordRequired'),
+                                            required: t(
+                                                'auth.passwordRequired'
+                                            ),
                                             minLength: {
                                                 value: 8,
-                                                message: t('auth.passwordLength'),
+                                                message: t(
+                                                    'auth.passwordLength'
+                                                ),
                                             },
                                         })}
                                         className="p-3 rounded-lg bg-[#2d262f] border border-[#503b5e] text-white focus:border-[#aa6ced] focus:shadow-purple-500 focus:shadow-sm transition w-full"
@@ -162,7 +166,9 @@ export function Register() {
                                         placeholder={t('auth.confirmPassword')}
                                         type="password"
                                         {...register('password2', {
-                                            required: t('auth.confirmPasswordRequired'),
+                                            required: t(
+                                                'auth.confirmPasswordRequired'
+                                            ),
                                             validate: (value) =>
                                                 value === watch('password') ||
                                                 t('auth.passwordsDoNotMatch'),
@@ -192,7 +198,7 @@ export function Register() {
 }
 
 export function Login() {
-    const { t } = useTranslation();
+    const { t } = useTranslation()
     const { setIsAuthenticated, setUsername } = useAuth()
     const [loginError, setLoginError] = useState<string>('')
     const [isLoading, setIsLoading] = useState(false)
@@ -235,8 +241,7 @@ export function Login() {
             })
             .catch((err) => {
                 setLoginError(
-                    err.response?.data?.detail ||
-                        t('auth.loginError')
+                    err.response?.data?.detail || t('auth.loginError')
                 )
                 setIsLoading(false)
             })
@@ -250,13 +255,11 @@ export function Login() {
     return (
         <div className="flex flex-col gap-8 max-w-4xl mx-auto p-8">
             <div
-                className={`flex flex-wrap justify-center gap-8 p-8 ${
-                    isMobile
-                        ? 'bg-[#2d262f]'
-                        : 'bg-[#2d262f]/50 backdrop-blur-md'
+                className={`flex flex-col items-center p-8 ${
+                    isMobile ? 'bg-[#2d262f]' : 'bg-black/25 backdrop-blur-sm'
                 } rounded-xl shadow-lg`}
             >
-                <div className="flex-1 min-w-[280px] max-w-[400px] flex flex-col gap-6">
+                <div className="w-full max-w-[400px] flex flex-col gap-6">
                     <h2 className="text-xl font-semibold text-white text-center">
                         {t('auth.loginToPixelshift')}
                     </h2>
@@ -303,16 +306,20 @@ export function Login() {
                             disabled={isLoading}
                             className="p-3 bg-[#aa6ced] text-white border-none rounded-lg font-semibold cursor-pointer hover:bg-[#915ace] transition w-full disabled:bg-[#734d95] disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            {isLoading ? t('auth.loggingIn') : t('auth.loginButton')}
+                            {isLoading
+                                ? t('auth.loggingIn')
+                                : t('auth.loginButton')}
                         </button>
                     </form>
                 </div>
 
-                <div className="flex items-center relative before:content-[''] before:h-px before:bg-[#503b5e] before:flex-grow after:content-[''] after:h-px after:bg-[#503b5e] after:flex-grow">
-                    <span className="px-4 text-gray-500 text-sm">{t('auth.or')}</span>
+                <div className="w-full max-w-[400px] flex items-center relative my-6 before:content-[''] before:h-px before:bg-[#503b5e] before:flex-grow after:content-[''] after:h-px after:bg-[#503b5e] after:flex-grow">
+                    <span className="px-4 text-gray-500 text-sm">
+                        {t('auth.or')}
+                    </span>
                 </div>
 
-                <div className="flex-1 min-w-[280px] max-w-[400px] flex flex-col items-center self-center">
+                <div className="w-full max-w-[400px] flex flex-col items-center">
                     <h2 className="text-xl font-semibold text-white text-center mb-4">
                         {t('auth.continueAsGuest')}
                     </h2>
