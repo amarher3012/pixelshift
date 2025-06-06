@@ -1,0 +1,51 @@
+:root {
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #382f3c;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+input,
+textarea,
+select {
+    background-color: #2d262f;
+    border: 1px solid #503b5e;
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.87);
+    padding: 8px 12px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    outline: none;
+    width: 100%;
+}
+
+input[type='submit'] {
+    background-color: #aa6ced;
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+input[type='submit']:hover {
+    background-color: #915ace;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #aa6ced;
+    box-shadow: 0 0 0 2px rgba(56, 47, 60, 0.25);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
