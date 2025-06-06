@@ -22,7 +22,6 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get("refreshToken")
 
-        # If a refresh token is present, the user is logged in
         if refresh_token:
             try:
                 RefreshToken(refresh_token).verify()

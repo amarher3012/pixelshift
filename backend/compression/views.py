@@ -92,7 +92,7 @@ class ImageCompressionView(generics.ListCreateAPIView):
                     if not (1 <= quality <= 100):
                         raise ValueError("Quality must be between 1 and 100")
                 except (TypeError, ValueError):
-                    quality = 75  # default if invalid
+                    quality = 75
 
                 serializer.save(quality=quality)
                 response.data = serializer.data
@@ -117,11 +117,17 @@ class ImageHubView(generics.ListAPIView):
         queryset = CompressedImage.objects.all().order_by("-created_at")
         user = self.request.user
 
-        # Image viewing permissions
         if user.is_authenticated:
-            return queryset.filter(models.Q(is_public=True) | models.Q(user=user))
+            queryset = queryset.filter(models.Q(is_public=True) | models.Q(user=user))
         else:
-            return queryset.filter(is_public=True)
+            queryset = queryset.filter(is_public=True)
+
+        # Filter out missing images
+        return [
+            img
+            for img in queryset
+            if img.image and img.image.storage.exists(img.image.name)
+        ]
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -135,12 +141,17 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [AllowAny]
     pagination_class = PageNumberPagination
 
+    def get_object(self):
+        instance = super().get_object()
+        if not instance.image or not instance.image.storage.exists(instance.image.name):
+            raise Http404("Image not found or already deleted")
+        return instance
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         user = request.user
         guest_id = request.COOKIES.get("guest_id")
 
-        # Edit permissions
         if user.is_authenticated:
             if instance.user != user:
                 return Response(
@@ -176,7 +187,6 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
         user = request.user
         guest_id = request.COOKIES.get("guest_id")
 
-        # Delete permissions
         if user.is_authenticated:
             if instance.user != user:
                 return Response(
@@ -198,29 +208,20 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        user = self.request.user
-        guest_id = self.request.COOKIES.get("guest_id")
-
-        if user.is_authenticated:
-            return queryset.filter(models.Q(is_public=True) | models.Q(user=user))
-        elif guest_id:
-            return queryset.filter(
-                models.Q(is_public=True) | models.Q(guest_user__guest_id=guest_id)
-            )
-
-        return queryset.filter(is_public=True)
-
 
 class UserImagesView(generics.ListAPIView):
     serializer_class = CompressedImageSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return CompressedImage.objects.filter(user=self.request.user).order_by(
+        queryset = CompressedImage.objects.filter(user=self.request.user).order_by(
             "-created_at"
         )
+        return [
+            img
+            for img in queryset
+            if img.image and img.image.storage.exists(img.image.name)
+        ]
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

@@ -3,8 +3,6 @@ services:
         image: amarher/backend-web:latest
         depends_on:
             - db
-        # volumes:
-        #     - .:/app
         ports:
             - '8000:8000'
         labels:
