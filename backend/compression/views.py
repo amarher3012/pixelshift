@@ -8,6 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
 from django.db import models
+from django.http import Http404
 
 from .models import GuestUser, CompressedImage
 from .serializers import CompressedImageSerializer
@@ -143,8 +144,27 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         instance = super().get_object()
+        user = self.request.user
+        guest_id = self.request.COOKIES.get("guest_id")
+
         if not instance.image or not instance.image.storage.exists(instance.image.name):
             raise Http404("Image not found or already deleted")
+
+        if instance.is_public:
+            return instance
+
+        if user.is_authenticated:
+            if instance.user != user:
+                raise Http404("Image not found")
+        elif (
+            instance.guest_user
+            and guest_id
+            and instance.guest_user.guest_id == guest_id
+        ):
+            pass
+        else:
+            raise Http404("Image not found")
+
         return instance
 
     def update(self, request, *args, **kwargs):
