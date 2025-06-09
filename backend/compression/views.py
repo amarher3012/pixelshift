@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.db import models
 from django.http import Http404
 
+
 from .models import GuestUser, CompressedImage
 from .serializers import CompressedImageSerializer
 from .models import GuestUser, CompressedImage
@@ -164,7 +165,7 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
             pass
         else:
             raise Http404("Image not found")
-
+            
         return instance
 
     def update(self, request, *args, **kwargs):
