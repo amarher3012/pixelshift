@@ -32,9 +32,6 @@ class CompressedImage(models.Model):
     guest_user = models.ForeignKey(
         GuestUser, on_delete=models.SET_NULL, null=True, blank=True
     )
-    guest_user = models.ForeignKey(
-        GuestUser, on_delete=models.SET_NULL, null=True, blank=True
-    )
     created_at = models.DateTimeField(auto_now_add=True)
     is_public = models.BooleanField(default=True)
 
